@@ -3,12 +3,12 @@
 [![Check config](https://github.com/eggplants/mise-bootstrap/actions/workflows/check.yml/badge.svg)](https://github.com/eggplants/mise-bootstrap/actions/workflows/check.yml)
 [![Validate autoinstall.yaml](https://github.com/eggplants/mise-bootstrap/actions/workflows/validate-autoinstall.yml/badge.svg)](https://github.com/eggplants/mise-bootstrap/actions/workflows/validate-autoinstall.yml)
 
-| Machine | `env =` in `miserc.local.toml` |
+| Machine | `env` in `miserc.local.toml` |
 |---|---|
 | macOS (Apple Silicon) | `["macos"]` |
 | Termux | `["termux"]` |
 | Ubuntu Desktop | `["linux", "ubuntu", "desktop"]` |
-| Ubuntu (headless) | `["linux", "ubuntu"]` |
+| Ubuntu Server | `["linux", "ubuntu"]` |
 | NanoPi R6S | `["linux", "nanopi"]` |
 
 ## Update
