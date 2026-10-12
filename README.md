@@ -11,7 +11,16 @@
 | Ubuntu (headless) | `["linux", "ubuntu"]` |
 | NanoPi R6S | `["linux", "nanopi"]` |
 
-## Run
+## Update
+
+```bash
+git -C ~/.config/mise pull --ff-only && mb --only dotfiles
+mb --dry-run
+mb
+mise bootstrap status
+```
+
+## Setup
 
 ### macOS
 
@@ -95,15 +104,6 @@ rm -rf ~/.config/mise/compose/scanned && mb    # scan the channels again
 - Grafana: `http://npi01.<tailnet>.ts.net:3000`
 
 </details>
-
-## Update
-
-```bash
-git -C ~/.config/mise pull --ff-only && mb --only dotfiles
-mb --dry-run
-mb
-mise bootstrap status
-```
 
 ## Family
 
