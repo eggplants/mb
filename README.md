@@ -53,9 +53,9 @@ It installs mise and clones this repo to `~/.config/mise`. After restarted:
 bash ~/.config/mise/bootstrap.sh
 ```
 
-`bootstrap.sh` adds the `desktop` module when `ubuntu-desktop-minimal` is installed. To choose yourself, run it with `DESKTOP=1` or `DESKTOP=0`.
-
 ### NanoPi R6S
+
+<details>
 
 - Machine: [NanoPi R6S](https://www.friendlyelec.com/index.php?route=product/product&product_id=289)
 - Tuner: [PX-W3U4](https://plex-net.co.jp/itemreco/px-w3u4/) (`/dev/px4video{0..3}`)
@@ -93,6 +93,8 @@ rm -rf ~/.config/mise/compose/scanned && mb    # scan the channels again
 - EPGStation: `http://npi01.<tailnet>.ts.net:8888/#/`
 - KonomiTV: `https://<tailscale-ip-with-dashes>.local.konomi.tv:7000/tv/`
 - Grafana: `http://npi01.<tailnet>.ts.net:3000`
+
+</details>
 
 ## Update
 
