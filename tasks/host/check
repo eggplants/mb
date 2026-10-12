@@ -3,10 +3,25 @@
 #MISE hide=true
 # Runs before every platform's bootstrap task and before the destructive NanoPi tasks
 # (#MISE depends=["host:check"]), so `mise bootstrap --only task`, `mise run bootstrap` and
-# `mise run hdd:init` cannot run on the wrong host. bootstrap.sh --detect holds the host tests.
+# `mise run hdd:init` cannot run on the wrong host. `--detect` prints this host's platform.
+# The host tests mirror guard.tera and bootstrap.sh (ci/check.sh compares them).
 set -euo pipefail
-root="$(cd "$(dirname "$0")/../.." && pwd)"
-host="$(bash "$root/bootstrap.sh" --detect)"
+# shellcheck disable=SC1091 # /etc/os-release
+if [[ -n "${TERMUX_VERSION:-}" || -x /data/data/com.termux/files/usr/bin/pkg ]]; then
+  host=termux
+elif [[ "$(uname -s)" == Darwin ]]; then
+  host=macos
+elif grep -aqsi nanopi /proc/device-tree/model; then
+  host=nanopi
+elif [[ "$(. /etc/os-release 2>/dev/null && echo "$ID")" == ubuntu ]]; then
+  host=ubuntu
+else
+  host=unknown
+fi
+if [[ "${1:-}" == --detect ]]; then
+  echo "$host"
+  exit 0
+fi
 sel="${MISE_ENV:-}"
 case "$sel" in
   macos) want=macos ;;

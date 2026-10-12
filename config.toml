@@ -6,7 +6,7 @@
 # hooks, services, compose, login shell or /etc files (ci/check.sh enforces this).
 # `mise use -g`, `mise bootstrap packages use -g` and `mise dot add` write into this machine's
 # module (each platform module sets [settings] write_targets), not here.
-min_version = "2026.10.7" # bootstrap.sh checks the same version before it touches anything
+min_version = "2026.10.7"
 
 # Guard: guard.tera throws unless the env selection is exactly one of the lists above and
 # is meant for this host. mise renders [bootstrap.files] templates before its first change,

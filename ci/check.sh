@@ -98,11 +98,12 @@ else
   echo "SKIP: shellcheck not found" >&2
 fi
 
-# 6. guard.tera and bootstrap.sh detect hosts with the same tests, and every allowed list is
-#    known to the guard and to tasks/host/check.
+# 6. guard.tera, tasks/host/check and bootstrap.sh detect hosts with the same tests, and every
+#    allowed list is known to the guard and to tasks/host/check.
 for marker in 'grep -aqsi nanopi /proc/device-tree/model' '/data/data/com.termux/files/usr/bin/pkg' \
   'TERMUX_VERSION' '/etc/os-release'; do
   grep -qF "$marker" guard.tera || fail "guard.tera lacks the host test '$marker'"
+  grep -qF "$marker" tasks/host/check || fail "tasks/host/check lacks the host test '$marker'"
   grep -qF "$marker" bootstrap.sh || fail "bootstrap.sh lacks the host test '$marker'"
 done
 grep -q '^{#- host check' guard.tera || fail "guard.tera lacks the '{#- host check' line that previews cut at"
@@ -160,7 +161,7 @@ for bad in "" desktop ubuntu nanopi linux linux,desktop,ubuntu desktop,linux,ubu
   out="$(MISE_ENV="$bad" mise bootstrap files status 2>&1 || true)"
   grep -q 'mise-bootstrap guard: env selection' <<<"$out" || fail "guard accepted [$bad]"
 done
-host="$(bash "$repo/bootstrap.sh" --detect)"
+host="$(bash "$repo/tasks/host/check" --detect)"
 for sel in "${selections[@]}"; do
   out="$(MISE_ENV="$sel" mise bootstrap files status 2>&1)" && rc=0 || rc=$?
   if [[ "$(platform_of "$sel")" == "$host" ]]; then

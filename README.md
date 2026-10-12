@@ -18,10 +18,10 @@
 ```zsh
 # Place your GPG secret key at ~/.sec.key, then:
 bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mise-bootstrap/main/bootstrap.sh)
-```
 
-- If the Command Line Tools dialog appears, run the command again after the install finishes.
-- On a brand-new Mac, run `mb` once more to install the Mac App Store apps: mise installs `mas` after the packages.
+# Run again to install `mas` packages
+mb
+```
 
 ### Termux
 
@@ -53,7 +53,7 @@ It installs mise and clones this repo to `~/.config/mise`. After restarted:
 bash ~/.config/mise/bootstrap.sh
 ```
 
-`bootstrap.sh` adds the `desktop` module when `ubuntu-desktop-minimal` is installed. To choose yourself, pass `--desktop` or `--no-desktop`.
+`bootstrap.sh` adds the `desktop` module when `ubuntu-desktop-minimal` is installed. To choose yourself, run it with `DESKTOP=1` or `DESKTOP=0`.
 
 ### NanoPi R6S
 
@@ -75,7 +75,7 @@ Log in as `eggplants`, then:
 bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mise-bootstrap/main/bootstrap.sh)
 sudo reboot
 
-mise bootstrap
+mb
 ```
 
 If `/mnt/hdd1` is not mounted, `bootstrap.sh` first runs `mise run hdd:init`. It asks you to insert the external disk, then **formats** it after a confirmation.

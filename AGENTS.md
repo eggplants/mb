@@ -10,7 +10,7 @@ The global [mise](https://mise.jdx.dev) config for four kinds of machine:
 
 Every machine clones it as `~/.config/mise`. `mise bootstrap` then sets the machine up from `config.toml`, which every machine loads, plus the modules in `conf.d/` that the machine's env list selects.
 
-It replaces eggplants/setup-macos.sh, setup-termux.sh, setup-ubuntu.sh and setup-nanopi. They were imported with `git subtree`, so their commits, with the same SHAs, are ancestors of `main`.
+It replaces eggplants/setup-macos.sh, setup-termux.sh, setup-ubuntu.sh and setup-nanopi; their history stays in those (archived) repos.
 
 ## Apply the config
 
@@ -19,19 +19,19 @@ mb --dry-run   # preview
 mb             # apply
 ```
 
-`mb` is a zsh function in `dotfiles/zshrc`. It runs `mise bootstrap` from `~`, and refuses `-E`/`--env` (and its hidden alias `-P`/`--profile`), a set `MISE_ENV`, `MISE_PROFILE` or `MISE_ENVIRONMENT`, `-C`/`--cd` (another directory would add its project config to the run), and any `unapply` other than `unapply desktop`. Before the zsh setup is linked, `bash ~/.config/mise/bootstrap.sh [--dry-run]` does the same.
+`mb` is a zsh function in `dotfiles/zshrc`. It runs `mise bootstrap` from `~`, and refuses `-E`/`--env` (and its hidden alias `-P`/`--profile`), a set `MISE_ENV`, `MISE_PROFILE` or `MISE_ENVIRONMENT`, `-C`/`--cd` (another directory would add its project config to the run), and any `unapply` other than `unapply desktop`. Without the zsh setup, run `cd ~ && mise bootstrap` with no `-E`, `-C` or `MISE_ENV`.
 
 ## Env selection
 
-`~/.config/mise/miserc.local.toml` pins the env list. It is gitignored and written by `bootstrap.sh`. For each name in the list, `conf.d/<name>/mise.<name>.toml` loads after `config.toml`, in list order, and a later module wins. That order holds only while mise runs outside `conf.d/` (see Gotchas).
+`~/.config/mise/miserc.local.toml` pins the env list. It is gitignored and written by `bootstrap.sh` on the first run (it never overwrites an existing one). For each name in the list, `conf.d/<name>/mise.<name>.toml` loads after `config.toml`, in list order, and a later module wins. That order holds only while mise runs outside `conf.d/` (see Gotchas).
 
-| Machine | `env =` | `bootstrap.sh` detects it by (tested in this order) |
+| Machine | `env =` | Detected by (tested in this order) |
 |---|---|---|
 | Termux | `["termux"]` | `$TERMUX_VERSION` is set, or `/data/data/com.termux/files/usr/bin/pkg` is executable |
 | macOS | `["macos"]` | `uname -s` is `Darwin` |
 | NanoPi R6S | `["linux", "nanopi"]` | Linux, and `/proc/device-tree/model` contains `nanopi` in any case |
-| Ubuntu Desktop | `["linux", "ubuntu", "desktop"]` | `/etc/os-release` has `ID=ubuntu`. Desktop is added when the current pin has it, or else when `ubuntu-desktop-minimal` is installed. |
-| Ubuntu (headless) | `["linux", "ubuntu"]` | the same, without desktop. `--desktop` and `--no-desktop` override the choice. |
+| Ubuntu Desktop | `["linux", "ubuntu", "desktop"]` | `/etc/os-release` has `ID=ubuntu`. `bootstrap.sh` adds desktop when `ubuntu-desktop-minimal` is installed. |
+| Ubuntu (headless) | `["linux", "ubuntu"]` | the same, without desktop. `DESKTOP=1` / `DESKTOP=0` override the choice. |
 
 - **The order matters.**
   - `linux` comes first: it is the shared base, and the platform module can override any key in it.
@@ -49,8 +49,8 @@ mb             # apply
 | `config.toml` | Every machine. It holds: `min_version`; the guard entries; `[bootstrap.repos]` for the zsh plugins and nano syntax; the shared `[dotfiles]`; shell activation; and a fallback `bootstrap` task that fails. The shared dotfiles are zshrc, zshenv and nanorc, plus gitconfig through `variants` on macOS, Termux and Ubuntu. |
 | `guard.tera` | Renders empty when the env list is one of the five and matches this host; otherwise `throw()` stops mise before it changes anything |
 | `miserc.toml` | `auto_env = false` |
-| `bootstrap.sh` | Detects the platform, installs prerequisites, clones the repo, pins `miserc.local.toml`, runs the platform pre-steps, then `exec mise bootstrap`. Options: `--check`, `--migrate`, `--detect`, `--platform`, `--desktop`/`--no-desktop`. |
-| `tasks/host/check` | `host:check` (hidden): fails unless `MISE_ENV` is a valid list that matches `bootstrap.sh --detect` |
+| `bootstrap.sh` | First run only: detects the platform, installs git and mise, clones the repo (unless present), pins `miserc.local.toml` (unless present), runs the platform pre-steps (Termux: link the `pkg` plugin; NanoPi: `hdd:init`), then `exec mise bootstrap` (with `--update` on Ubuntu and the NanoPi). Extra arguments go to `mise bootstrap`. |
+| `tasks/host/check` | `host:check` (hidden): fails unless `MISE_ENV` is a valid list that matches this host. `bash tasks/host/check --detect` prints the host's platform. |
 | `dotfiles/` | Shared dotfiles: `zshrc` (with `mb()`), `zshenv`, `nanorc`, `gitconfig` |
 | `shared/workstation-tools.toml` | The `[tools]` that macOS and Ubuntu share, pulled in by both modules with `include` |
 | `shared/tasks/gpg/` | `setup:gpg`, `setup:git` (macOS, Termux, Ubuntu) |
@@ -78,7 +78,7 @@ mb             # apply
   - `guard.tera`, from `[bootstrap.files]`, and a `[dotfiles]` copy for `--only dotfiles` and `mise dot apply`;
   - `host:check`, which every platform's `bootstrap` task and every destructive task depend on;
   - `mb()`;
-  - `bootstrap.sh`, which refuses `-E`/`-P`, `-C`/`--cd` and a set `MISE_ENV`, `MISE_PROFILE` or `MISE_ENVIRONMENT`, and changes to `~`.
+  - `bootstrap.sh`, which refuses a set `MISE_ENV`, `MISE_PROFILE` or `MISE_ENVIRONMENT`, and changes to `~`.
 - **`[tools]` per module.** Termux cannot run glibc builds, and the NanoPi needs almost none.
   - The 12 tools that macOS and Ubuntu share live in `shared/workstation-tools.toml`, which both modules `include`. It may hold only `[tools]`, and a module's own entry wins over it.
   - Versions that differ stay in the modules: python 3.14.2 and java latest on macOS, python latest and java 21 on Ubuntu.
@@ -125,8 +125,7 @@ mb             # apply
 
 - **`pkg:` plugin.**
   - mise reports Termux as `android`, where the built-in `apt` manager is skipped, so `plugins/pkg` adds a `pkg:` manager.
-  - `[bootstrap.plugins]` only takes Git URLs, so `bootstrap.sh` (and `--migrate`) runs `mise plugins link --force pkg ~/.config/mise/plugins/pkg` instead.
-  - The plugin stays at the repo root so that the existing link stays valid.
+  - `[bootstrap.plugins]` only takes Git URLs, so `bootstrap.sh` runs `mise plugins link --force pkg ~/.config/mise/plugins/pkg` instead. Run that again by hand if the link is lost.
 - **pkg vs mise tools.** Prebuilt mise tools target glibc Linux, not Android, so everything comes from `pkg`. Only `cargo:` tools, which are built locally, go in `[tools]`. An example is `termscp`, which `pkg` lacks. `cargo.binstall = false`.
 - **Packages before tools.**
   - `mise bootstrap` installs `[tools]` before plugin packages, but `cargo:termscp` needs rust, perl, make, pkg-config, samba and dbus from `pkg`.
@@ -137,12 +136,12 @@ mb             # apply
 
 #### Ubuntu
 
-- **Desktop is an add-on module.** `conf.d/ubuntu` is the headless machine and `conf.d/desktop` adds the GUI on top. To drop the desktop, re-pin with `bootstrap.sh --no-desktop`, then run `mb unapply desktop`.
+- **Desktop is an add-on module.** `conf.d/ubuntu` is the headless machine and `conf.d/desktop` adds the GUI on top. To drop the desktop, set `env = ["linux", "ubuntu"]` in `miserc.local.toml`, then run `mb unapply desktop`.
 - **apt vs mise tools.** System libraries, media tools and GUI apps come from apt. Language runtimes and dev CLIs come from `[tools]`. Ubuntu declares `gnupg`, not the transitional `gnupg2`, and gets `nano` and `ca-certificates` from `conf.d/linux`.
 - **Vendor apt repos.**
   - Docker (in `conf.d/linux`) and WineHQ (in desktop) are declared in `[bootstrap.files]` with `phase = "pre-packages"`: a key plus a deb822 `.sources` file. The codename (and, for Docker, the distro and architecture) is rendered with `exec()`.
   - An old `docker.list` is removed, because a second `Signed-By` makes apt fail.
-  - `bootstrap.sh` adds `--update` so apt metadata is refreshed after the sources change.
+  - Run `mb --update` after the sources change, so apt metadata is refreshed (`bootstrap.sh` does this on the first run).
   - Chrome and VS Code are installed from their `.deb` by the desktop hook, because those packages write their own apt repo, and declaring it ourselves would conflict on `Signed-By`.
 - **Docker (rootless).** The rootful `docker` and `docker.socket` system units are declared stopped and disabled, and `setup:docker` runs `dockerd-rootless-setuptool.sh install`. `dotfiles/zshenv` sets `DOCKER_HOST` only when the rootless user unit exists.
 - **Wine/RPG2000 setup** is an XDG autostart `.desktop` entry, not a systemd unit. So the blocking GUI installer runs on the first graphical login, never during `mise bootstrap`.
@@ -162,7 +161,7 @@ mb             # apply
 - **Node.js** comes from apt (system-wide), because KonomiTV runs under `sudo pm2`, which cannot see mise shims.
 - **External HDD.**
   - `hdd:init` formats and mounts the external storage at `/mnt/hdd1`. It is interactive and destructive.
-  - `bootstrap.sh` runs it only when `/mnt/hdd1` is not mounted, and never in a `--dry-run`.
+  - `bootstrap.sh` runs it on the first run when `/mnt/hdd1` is not mounted.
   - It, like `setup:system` (which removes the `pi` user), has `#MISE depends=["host:check"]`.
 - **Runtime data lives in the checkout.** `compose/scanned/` and EPGStation's `data/`, `thumbnail/` and `logs/` are gitignored and stay in place across updates.
 
@@ -184,16 +183,16 @@ mb             # apply
 - **No `# MISE` comments in task files.** A comment line that starts with `# MISE` is parsed as a `#MISE` header.
 - **A new platform module needs `write_targets`,** or `mise use -g` writes into `config.toml`.
 - **`mise dot add` saves the file under `~/.dotfiles`** (mise's `dotfiles.root`), even though the entry goes into the module. Pass `--source ~/.config/mise/conf.d/<platform>/dotfiles/<name>` to keep the file in this repo.
-- **Keep the guard copies in sync.** The allowed lists appear in `guard.tera`, `tasks/host/check`, `bootstrap.sh` and `ci/check.sh`. The host tests have one shell copy, `detect_platform()` in `bootstrap.sh`, which `host:check` reuses, and one Tera copy in `guard.tera`; `ci/check.sh` checks both for the same markers.
+- **Keep the guard copies in sync.** The allowed lists appear in `guard.tera`, `tasks/host/check`, `bootstrap.sh` and `ci/check.sh`. The host tests are in `tasks/host/check` and `bootstrap.sh` (shell) and `guard.tera` (Tera); `ci/check.sh` checks all three for the same markers.
   - A new destructive task gets `#MISE depends=["host:check"]`.
   - The guard covers only runs that include files, dotfiles or the `bootstrap` task. An explicit wrong `-E` with any other `--only` selection (packages, services, compose, tools, repos, user, linux-systemd-units, mise-shell-activate, …) runs unchecked.
   - The dotfile copy of the guard writes an empty `~/.local/state/mise-bootstrap/dotfiles-guard`, which shows up in `mise dot status`.
 - **Unapplying this machine's own env is destructive.** `mise bootstrap unapply <module>` removes the files, dotfiles, directories and user services that the module declares; mise only asks for confirmation (or not, with `--yes`). For example, `unapply nanopi` removes `~/.ssh/authorized_keys`. Only `mb unapply desktop` is supported.
   - The shared dotfiles survive, because `config.toml` still declares them.
 - **Never run `git clean -x` in `~/.config/mise` on the NanoPi.** It deletes the gitignored runtime data under `compose/`.
-- **`min_version`.** `config.toml` requires mise 2026.10.7 or newer, and `bootstrap.sh` checks the same version.
+- **`min_version`.** `config.toml` requires mise 2026.10.7 or newer.
   - An older mise fails on every call, including the shell hook. Termux gets mise from `pkg`.
-  - Bump `min_version`, `min_mise` in `bootstrap.sh` and `MISE_VERSION` in `check.yml` together.
+  - Bump `min_version` and `MISE_VERSION` in `check.yml` together.
 - **Previewing another platform.** On this host the guard rejects `mise -E <other platform>`, and that is intended. To preview, run `bash ci/check.sh`: it dry-runs every selection from a copy with the host test stripped.
 - **macOS `plan` and `status` need Ruby 3 or newer on `PATH`**, to evaluate the `openai/tools` tap cask: mise's ruby, as in an activated shell (`/usr/bin/ruby` is 2.6). They also call the GitHub API: without `gh auth login` or a `GITHUB_TOKEN`, the 60-requests-an-hour anonymous limit applies.
 - **History.** For files merged from the four repos, use `git log -- <path>` or `git blame -C`. `--follow` gets confused by the near-identical imported siblings.
@@ -223,7 +222,7 @@ docker rm -f termux
 - Run commands through `/entrypoint.sh`, so they run as the Termux user; `pkg` refuses to run as root.
 - `docker cp` needs the parent directory, and a fresh container has no `~/.config`.
 - `rm -f miserc.local.toml` drops this host's pin, which `docker cp` copied in. `bootstrap.sh` then detects Termux (via `.../usr/bin/pkg`) and pins `env = ["termux"]`.
-- `bootstrap.sh` refuses a checkout without this repo's `origin`.
+- `bootstrap.sh` refuses a `~/.config/mise` whose `origin` is not this repo.
 - The container has no termux-exec (`LD_PRELOAD` is empty), so a `#!/usr/bin/env` script cannot be started directly there. Start scripts with `bash <script>`. File tasks still work, through `use_file_shell_for_executable_tasks`.
 - The container has no Android framework, so `getprop` and `termux-setup-storage` fail there.
 - For a quick check, end with `bash ~/.config/mise/bootstrap.sh --dry-run`.
