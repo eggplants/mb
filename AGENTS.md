@@ -54,7 +54,7 @@ mb             # apply
 | `dotfiles/` | Shared dotfiles: `zshrc` (with `mb()`), `zshenv`, `nanorc`, `gitconfig` |
 | `shared/workstation-tools.toml` | The `[tools]` that macOS and Ubuntu share, pulled in by both modules with `include` |
 | `shared/tasks/gpg/` | `setup:gpg`, `setup:git` (macOS, Termux, Ubuntu) |
-| `shared/tasks/claude/` | `setup:claude` (macOS, Termux, Ubuntu) |
+| `shared/tasks/claude/` | `setup:claude` (macOS, Termux, Ubuntu): the claude-statusbar statusLine in `~/.claude`, copied to `~/.mclaude` for the `mclaude` alias |
 | `shared/tasks/workstation/` | `setup:vscode` (macOS, Ubuntu) |
 | `conf.d/linux/` | Ubuntu and NanoPi: the apt base, including Docker CE; the Docker apt repo (one `docker.sources` template); the login shell |
 | `conf.d/macos/` | `[tools]`; `brew:`, `brew-cask:` and `mas:` packages; the login shell; the colima LaunchAgent; gpg-agent and Ghostty dotfiles; the `stop-brew-colima.sh` hook; `setup:macos`, `setup:docker` |
