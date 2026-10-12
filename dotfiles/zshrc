@@ -72,6 +72,8 @@ mb() {
     print -u2 "mb: only 'mb unapply desktop' is supported; unapplying this machine's platform removes the files and dotfiles it declares"
     return 1
   fi
+  git -C ~/.config/mise pull --ff-only --quiet ||
+    print -u2 "mb: git pull failed; applying the local checkout"
   (cd ~ && mise bootstrap "$@")
 }
 

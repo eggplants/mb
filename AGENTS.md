@@ -19,7 +19,7 @@ mb --dry-run   # preview
 mb             # apply
 ```
 
-`mb` is a zsh function in `dotfiles/zshrc`. It runs `mise bootstrap` from `~`, and refuses `-E`/`--env` (and its hidden alias `-P`/`--profile`), a set `MISE_ENV`, `MISE_PROFILE` or `MISE_ENVIRONMENT`, `-C`/`--cd` (another directory would add its project config to the run), and any `unapply` other than `unapply desktop`. Without the zsh setup, run `cd ~ && mise bootstrap` with no `-E`, `-C` or `MISE_ENV`.
+`mb` is a zsh function in `dotfiles/zshrc`. It runs `git pull --ff-only` in `~/.config/mise` (on failure it warns and applies the local checkout), then `mise bootstrap` from `~`. Before that, it refuses `-E`/`--env` (and its hidden alias `-P`/`--profile`), a set `MISE_ENV`, `MISE_PROFILE` or `MISE_ENVIRONMENT`, `-C`/`--cd` (another directory would add its project config to the run), and any `unapply` other than `unapply desktop`, without pulling. Without the zsh setup, run `cd ~ && mise bootstrap` with no `-E`, `-C` or `MISE_ENV`.
 
 ## Env selection
 

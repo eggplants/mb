@@ -14,10 +14,7 @@
 ## Update
 
 ```bash
-git -C ~/.config/mise pull --ff-only && mb --only dotfiles
-mb --dry-run
 mb
-mise bootstrap status
 ```
 
 ## Setup
@@ -37,16 +34,16 @@ mb
 After [Termux](https://termux.dev) installed:
 
 ```bash
-# select `Single mirror` > `default` to make `pkg` faster
+# Select `Single mirror` > `default` to make `pkg` faster
 termux-change-repo
 
-# enable to access local storage
+# Enable to access local storage
 termux-setup-storage
 
-# locate my.gpg key
+# Locate my.gpg key
 mv ~/storage/downloads/sec ~/.sec.key
 
-# setup
+# Setup
 bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mise-bootstrap/main/bootstrap.sh)
 ```
 
