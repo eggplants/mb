@@ -1,0 +1,116 @@
+# ~/.zshrc — managed by mise dotfiles (~/.config/mise/dotfiles/zshrc)
+# One file for every machine: platform-specific lines check $OSTYPE or whether a path exists.
+
+# PATH: on macOS /etc/zprofile (path_helper) reorders PATH for login shells, so re-prepend
+typeset -U path PATH
+if [[ $OSTYPE == darwin* ]]; then
+  path=("$HOME/.local/bin" /opt/homebrew/bin /opt/homebrew/sbin $path)
+  export PERLLIB="/Library/Developer/CommandLineTools/usr/share/git-core/perl:$PERLLIB"
+fi
+[[ -d $HOME/.lmstudio/bin ]] && path+=("$HOME/.lmstudio/bin")
+
+# history
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
+setopt appendhistory extendedhistory histignoredups sharehistory
+
+# options
+setopt correct autocd nolistbeep aliasfuncdef
+setopt extendedglob interactivecomments prompt_subst
+unsetopt nomatch
+
+# colors
+export LSCOLORS=gxfxcxdxbxegedabagacag
+export LS_COLORS='di=36;40:ln=35;40:so=32;40:pi=33;40:ex=31;40:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;46'
+
+# completion (the plugins are cloned by [bootstrap.repos] in config.toml)
+_zplug="$HOME/.local/share/zsh/plugins"
+[[ -d /opt/homebrew/share/zsh/site-functions ]] && fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
+[[ -d $_zplug/zsh-completions/src ]] && fpath=("$_zplug/zsh-completions/src" $fpath)
+autoload -U compinit && compinit
+zstyle ':completion:*' menu select
+zstyle ':completion:*:default' list-colors "${(s.:.)LS_COLORS}"
+
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+# aliases
+alias ll='ls -lGF --color=auto'
+alias ls='ls -GF --color=auto'
+alias mclaude='CLAUDE_CONFIG_DIR=~/.mclaude claude'
+# Ubuntu Desktop: font-noaa.conf comes from conf.d/desktop
+[[ -r $HOME/.config/wine/font-noaa.conf ]] &&
+  alias wine-rpg='FONTCONFIG_FILE="$HOME/.config/wine/font-noaa.conf" wine'
+
+# mb = `mise bootstrap` for this machine. Runs from ~ (a project .miserc.toml in the cwd would
+# replace the env list) and refuses whatever would replace or tear down the pinned platform.
+# A shell started from an older zshrc still has `alias mb='mise bootstrap'`; re-sourcing this
+# file would then define mise() and bootstrap() here instead of mb() (aliasfuncdef).
+unalias mb 2>/dev/null
+mb() {
+  if [[ -n ${MISE_ENV+x}${MISE_PROFILE+x}${MISE_ENVIRONMENT+x} ]]; then
+    print -u2 "mb: unset MISE_ENV / MISE_PROFILE / MISE_ENVIRONMENT first; they replace miserc.local.toml's env list"
+    return 1
+  fi
+  local a f
+  for a in "$@"; do
+    # the short flags of a group (-nE) up to -C or -j, which take the rest as their value
+    f=
+    [[ $a == -[^-]* ]] && f=${${a#-}%%[Cj]*}
+    # -E/--env and its hidden alias -P/--profile
+    if [[ $f == *[EP]* || $a == --env || $a == --env=* || $a == --profile || $a == --profile=* ]]; then
+      print -u2 "mb: do not pass $a; the env list lives in ~/.config/mise/miserc.local.toml"
+      return 1
+    fi
+    # -C/--cd: another directory would add its project config to the run
+    if [[ $a == --cd || $a == --cd=* || ( $a == -[^-]* && ${a#-} == "$f"C* ) ]]; then
+      print -u2 "mb: do not pass $a; mb runs mise from ~, and another directory would add its project config"
+      return 1
+    fi
+  done
+  if (( ${argv[(Ie)unapply]} )) && [[ " $* " != *" desktop "* || " $* " == *" "(macos|termux|linux|ubuntu|nanopi)" "* ]]; then
+    print -u2 "mb: only 'mb unapply desktop' is supported; unapplying this machine's platform removes the files and dotfiles it declares"
+    return 1
+  fi
+  (cd ~ && mise bootstrap "$@")
+}
+
+# mise
+command -v mise >/dev/null && eval "$(mise activate zsh)"
+
+# GPG SSH agent, where the platform module deploys ~/.gnupg/gpg-agent.conf (macOS, Termux,
+# Ubuntu; not the NanoPi, where it would replace a forwarded SSH agent) and gnupg is installed
+if [[ -f $HOME/.gnupg/gpg-agent.conf ]] && (( $+commands[gpgconf] )); then
+  unset SSH_AGENT_PID
+  if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+    export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+  fi
+  export GPG_TTY=$(tty)
+  gpg-connect-agent updatestartuptty /bye >/dev/null
+fi
+
+# plugins (missing ones are skipped)
+if [[ -d "$_zplug/pure" ]]; then
+  fpath+=("$_zplug/pure")
+  autoload -U promptinit && promptinit && prompt pure
+fi
+for _p in zsh-autosuggestions fast-syntax-highlighting history-search-multi-word zsh-history-substring-search; do
+  if [[ -r "$_zplug/$_p/$_p.plugin.zsh" ]]; then
+    source "$_zplug/$_p/$_p.plugin.zsh"
+  elif [[ -r "$_zplug/$_p/$_p.zsh" ]]; then
+    source "$_zplug/$_p/$_p.zsh"
+  fi
+done
+unset _zplug _p
+
+if (( $+widgets[history-substring-search-up] )); then
+  bindkey '^[[A' history-substring-search-up
+  bindkey '^[[B' history-substring-search-down
+else
+  bindkey '^[[A' up-line-or-search
+  bindkey '^[[B' down-line-or-search
+fi
+
+# machine-local additions that do not belong in the repo
+for _f in "$HOME"/.zshrc.d/*.zsh(N); do source "$_f"; done
+unset _f

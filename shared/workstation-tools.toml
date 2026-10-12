@@ -1,0 +1,16 @@
+# Tools shared by the two workstations: included by conf.d/macos and conf.d/ubuntu.
+# Only [tools] here (ci/check.sh enforces it); the including module's own entries win, and
+# `mise use -g` writes into the module, never into this file.
+[tools]
+ruby = "latest"
+node = "latest"
+go = "latest"
+rust = "latest"
+uv = "latest"
+claude = "latest"
+gh = "latest"
+jq = "latest"
+pinact = "latest"
+yt-dlp = "latest"
+"pipx:getjump" = "latest"
+"pipx:claude-statusbar" = "latest"

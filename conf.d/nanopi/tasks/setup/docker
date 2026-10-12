@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Add the user to the docker group"
+set -euo pipefail
+
+if ! id -nG "$USER" | tr ' ' '\n' | grep -qx docker; then
+  sudo usermod -aG docker "$USER"
+  echo "setup:docker: added $USER to the docker group; log in again to use it" >&2
+fi

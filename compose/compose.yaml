@@ -1,0 +1,113 @@
+services:
+  mirakc:
+    build:
+      dockerfile_inline: |
+        FROM mirakc/mirakc:debian
+        WORKDIR /tmp
+        RUN <<EOF
+        set -eux
+        curl -OL https://github.com/tsukumijima/libaribb25/releases/download/v0.2.9/libaribb25_0.2.9_arm64.deb
+        curl -OL https://github.com/CobaltCas/CobaltCas/raw/master/dist/libcobaltcas_1.0.0_arm64.deb # softcas
+        curl -OL https://github.com/kazuki0824/recisdb-rs/releases/download/1.2.3/recisdb_1.2.3-1_arm64.deb
+        apt update
+        # apt install pcscd libpcsclite-dev libccid pcsc-tools -y # hardcas
+        apt install ./libaribb25_*.deb -y
+        apt install ./libcobaltcas_*.deb -y # softcas
+        apt install ./recisdb_*.deb -y
+        apt autoremove -y
+        apt autoclean
+        rm -rf /var/lib/apt/lists/*
+        rm -rf /tmp/*
+        EOF
+        WORKDIR /
+    # entrypoint: "sh -c 'pcscd && mirakc'" # hardcas
+    entrypoint: mirakc # softcas
+    container_name: mirakc
+    init: true
+    restart: unless-stopped
+    devices:
+      # - /dev/pxm1urvideo0
+      - /dev/px4video0
+      - /dev/px4video1
+      - /dev/px4video2
+      - /dev/px4video3
+      # - /dev/bus/usb # hardcas
+    ports:
+      - 40772:40772
+    volumes:
+      - mirakc-epg:/var/lib/mirakc/epg
+      - ./scanned/mirakc/config.yml:/etc/mirakc/config.yml:ro
+    environment:
+      TZ: Asia/Tokyo
+      RUST_LOG: info
+  mysql:
+    image: mariadb:11.8
+    container_name: mysql
+    ports:
+      - 3306:3306
+    volumes:
+      - /mnt/hdd1/mysql:/var/lib/mysql
+    environment:
+      MYSQL_USER: epgstation
+      MYSQL_PASSWORD: epgstation
+      MYSQL_ROOT_PASSWORD: epgstation
+      MYSQL_DATABASE: epgstation
+      TZ: "Asia/Tokyo"
+      LANG: ja_JP.UTF-8
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --performance-schema=false --expire_logs_days=1
+    restart: always
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+  epgstation:
+    build:
+      dockerfile_inline: |
+        FROM l3tnun/epgstation:master-debian
+        WORKDIR /tmp
+        RUN <<EOF
+        set -eux
+        apt update
+        apt install ffmpeg -y
+        apt autoremove -y
+        apt autoclean
+        rm -rf /var/lib/apt/lists/*
+        rm -rf /tmp/*
+        EOF
+        WORKDIR /app
+    entrypoint: npm start
+    container_name: epgstation
+    volumes:
+      - ./epgstation/config:/app/config
+      - ./epgstation/data:/app/data
+      - ./epgstation/thumbnail:/app/thumbnail
+      - ./epgstation/logs:/app/logs
+      - /mnt/hdd1/recorded:/app/recorded
+    ports:
+      - 8888:8888
+    environment:
+      TZ: "Asia/Tokyo"
+    depends_on:
+      - mirakc
+      - mysql
+    restart: always
+  edcb-bridge:
+    # https://github.com/eggplants/edcb-bridge/pkgs/container/edcb-bridge
+    image: ghcr.io/eggplants/edcb-bridge:0.0
+    container_name: edcb-bridge
+    restart: unless-stopped
+    ports:
+      - 4510:4510
+    environment:
+      TZ: Asia/Tokyo
+      MIRAKC_URL: http://mirakc:40772
+      RECORDER: epgstation
+      EPGSTATION_URL: http://epgstation:8888
+      RECORDED_DIR: /mnt/hdd1/recorded # recording folder as seen by KonomiTV
+    depends_on:
+      - mirakc
+      - epgstation
+volumes:
+  mirakc-epg:
+    name: mirakc_epg
+    driver: local

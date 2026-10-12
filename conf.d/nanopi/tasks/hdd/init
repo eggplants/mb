@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+#MISE description="Format a newly inserted disk as ext4 and mount it at /mnt/hdd1 (destructive)"
+#MISE raw=true
+#MISE depends=["host:check"]
+set -euo pipefail
+
+mountpoint=/mnt/hdd1
+
+if mountpoint -q "$mountpoint"; then
+  echo "hdd:init: $mountpoint is already mounted" >&2
+  exit 0
+fi
+
+before="$(lsblk -dnpo NAME)"
+read -rp 'Insert the storage, then press Enter...'
+sleep 3
+disk="$(comm -13 <(sort <<<"$before") <(lsblk -dnpo NAME | sort) | head -1)"
+if [[ -z "$disk" ]]; then
+  echo "hdd:init: no new disk found" >&2
+  exit 1
+fi
+
+lsblk "$disk"
+read -rp "Format $disk as ext4? ALL DATA ON IT WILL BE LOST. [y/N] " answer
+[[ "$answer" == [yY] ]] || exit 1
+
+sudo mkfs -t ext4 "$disk"
+uuid="$(sudo blkid -s UUID -o value "$disk")"
+sudo mkdir -p "$mountpoint"
+grep -q "UUID=$uuid" /etc/fstab ||
+  echo "UUID=$uuid $mountpoint ext4 defaults,nofail 0 2" | sudo tee -a /etc/fstab
+sudo systemctl daemon-reload
+sudo mount "$mountpoint"
+sudo chmod 777 "$mountpoint"

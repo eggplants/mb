@@ -1,0 +1,161 @@
+# NanoPi R6S TV server (Debian 12 bookworm, arm64). Loads after conf.d/linux (apt base,
+# Docker repository key, login shell).
+
+[settings]
+# `mise use -g`, `mise bootstrap packages use -g` and `mise dot add` write here, not into config.toml
+write_targets.tools = "~/.config/mise/conf.d/nanopi/mise.nanopi.toml"
+write_targets.packages = "~/.config/mise/conf.d/nanopi/mise.nanopi.toml"
+write_targets.dotfiles = "~/.config/mise/conf.d/nanopi/mise.nanopi.toml"
+
+[tools]
+python = "latest"
+lazydocker = "latest"
+
+[bootstrap.packages]
+"apt:dialog" = "latest"
+"apt:jq" = "latest"
+"apt:locales" = "latest"
+"apt:fuse-overlayfs" = "latest"
+"apt:openssh-server" = "latest"
+"apt:avahi-daemon" = "latest"
+"apt:tailscale" = "latest"
+"apt:nodejs" = "latest"
+"apt:npm" = "latest"
+"apt:gcc" = "latest"
+"apt:python3-dev" = "latest"
+"apt:lshw" = "latest"
+"apt:libvorbis-dev" = "latest"
+"apt:prometheus" = "latest"
+"apt:prometheus-node-exporter" = "latest"
+"apt:grafana-enterprise" = "latest"
+
+[bootstrap.hooks]
+# px4_drv, recisdb, ISDBScanner, rkmppenc deps, and the first channel scan
+post-packages = "bash {{ config_root }}/scripts/install-debs.sh"
+
+# apt sources
+
+[bootstrap.files."/etc/apt/sources.list"]
+phase = "pre-packages"
+content = """
+deb http://ftp.jp.debian.org/debian bookworm main contrib non-free
+deb-src http://ftp.jp.debian.org/debian bookworm main contrib non-free
+deb http://security.debian.org/debian-security bookworm-security main contrib non-free
+deb-src http://security.debian.org/debian-security bookworm-security main contrib non-free
+deb http://ftp.jp.debian.org/debian bookworm-updates main contrib non-free
+deb-src http://ftp.jp.debian.org/debian bookworm-updates main contrib non-free
+"""
+
+# Written by the Tailscale install script / the old manual setup; replaced by the .sources
+# files below (a different Signed-By makes apt fail). conf.d/linux removes docker.list.
+[bootstrap.files."/etc/apt/sources.list.d/tailscale.list"]
+state = "absent"
+phase = "pre-packages"
+
+[bootstrap.files."/etc/apt/sources.list.d/grafana.list"]
+state = "absent"
+phase = "pre-packages"
+
+[bootstrap.files."/etc/apt/keyrings/tailscale.asc"]
+source = "files/apt/tailscale.asc"
+phase = "pre-packages"
+
+[bootstrap.files."/etc/apt/sources.list.d/tailscale.sources"]
+phase = "pre-packages"
+content = """
+Types: deb
+URIs: https://pkgs.tailscale.com/stable/debian
+Suites: bookworm
+Components: main
+Architectures: arm64
+Signed-By: /etc/apt/keyrings/tailscale.asc
+"""
+
+[bootstrap.files."/etc/apt/keyrings/grafana.asc"]
+source = "files/apt/grafana.asc"
+phase = "pre-packages"
+
+[bootstrap.files."/etc/apt/sources.list.d/grafana.sources"]
+phase = "pre-packages"
+content = """
+Types: deb
+URIs: https://apt.grafana.com
+Suites: stable
+Components: main
+Architectures: arm64
+Signed-By: /etc/apt/keyrings/grafana.asc
+"""
+
+# system
+
+[bootstrap.files."/etc/locale.gen"]
+content = """
+en_US.UTF-8 UTF-8
+ja_JP.UTF-8 UTF-8
+"""
+
+[bootstrap.files."/etc/default/locale"]
+content = "LANG=en_US.UTF-8\n"
+
+[bootstrap.files."/etc/ssh/sshd_config.d/10-no-password.conf"]
+content = "PasswordAuthentication no\n"
+notify = ["ssh"]
+
+[bootstrap.files."/etc/docker/daemon.json"]
+content = """
+{"storage-driver": "fuse-overlayfs"}
+"""
+notify = ["docker"]
+
+[bootstrap.directories."/mnt/hdd1/recorded"]
+mode = "0777"
+
+[bootstrap.directories."/mnt/hdd1/TV-Capture"]
+mode = "0777"
+
+[bootstrap.services.ssh]
+state = "running"
+enabled = true
+
+[bootstrap.services.avahi-daemon]
+state = "running"
+enabled = true
+
+[bootstrap.services.tailscaled]
+state = "running"
+enabled = true
+
+[bootstrap.services.docker]
+state = "running"
+enabled = true
+
+[bootstrap.services.prometheus]
+state = "running"
+enabled = true
+
+[bootstrap.services.prometheus-node-exporter]
+state = "running"
+enabled = true
+
+[bootstrap.services.grafana-server]
+state = "running"
+enabled = true
+
+# mirakc / MariaDB / EPGStation / edcb-bridge
+
+[bootstrap.compose.tv]
+project_dir = "{{ xdg_config_home }}/mise/compose"
+project_name = "tv"
+sudo = true # the user may not be in the docker group yet
+depends_on = ["package:apt:docker-compose-plugin", "service:docker", "file:/etc/docker/daemon.json"]
+
+[dotfiles]
+"~/.ssh/authorized_keys" = { source = "files/ssh/authorized_keys", mode = "copy", permissions = "0600" }
+
+[tasks.bootstrap]
+description = "Run imperative setup steps after the declarative bootstrap"
+depends = ["host:check"]
+run = [{ task = "setup:system" }, { task = "setup:docker" }, { task = "setup:konomitv" }]
+
+[task_config]
+includes = ["tasks"]

@@ -1,0 +1,25 @@
+name: Check config
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install mise (same version as min_version in config.toml)
+        run: |
+          curl -fsSL https://mise.run | MISE_VERSION=v2026.10.7 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: ci/check.sh
+        run: bash ci/check.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

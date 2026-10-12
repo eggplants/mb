@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+#MISE description="Remove the default user, set hostname, timezone, and locale, and connect to Tailscale"
+#MISE raw=true
+#MISE depends=["host:check"]
+set -euo pipefail
+
+hostname=npi01
+
+# Not [bootstrap.users] with state = "absent": mise fails to look up a missing
+# user when getpwnam() leaves errno = ENOENT.
+if id pi &>/dev/null; then
+  sudo userdel -r pi
+fi
+
+if [[ "$(hostnamectl --static)" != "$hostname" ]]; then
+  old="$(hostnamectl --static)"
+  sudo hostnamectl set-hostname "$hostname"
+  sudo sed -i "s/\b$old\b/$hostname/" /etc/hosts
+fi
+
+if [[ "$(timedatectl show -p Timezone --value)" != Asia/Tokyo ]]; then
+  sudo timedatectl set-timezone Asia/Tokyo
+fi
+
+# /etc/locale.gen and /etc/default/locale are written by [bootstrap.files]
+if ! locale -a | grep -qx en_US.utf8 || ! locale -a | grep -qx ja_JP.utf8; then
+  sudo locale-gen
+fi
+
+if ! tailscale status &>/dev/null; then
+  sudo tailscale up --qr
+fi

@@ -1,0 +1,48 @@
+# Shared by Ubuntu and the NanoPi (env lists "linux,ubuntu[,desktop]" and "linux,nanopi").
+# Loads before the platform module, so a platform module can override any key here.
+# Replaces setup-nanopi's "keep in sync with setup-ubuntu.sh" rule.
+
+[bootstrap.packages]
+"apt:ca-certificates" = "latest"
+"apt:curl" = "latest"
+"apt:wget" = "latest"
+"apt:git" = "latest"
+"apt:nano" = "latest"
+"apt:zsh" = "latest"
+"apt:docker-ce" = "latest"
+"apt:docker-ce-cli" = "latest"
+"apt:containerd.io" = "latest"
+"apt:docker-buildx-plugin" = "latest"
+"apt:docker-compose-plugin" = "latest"
+
+[bootstrap.directories."/etc/apt/keyrings"]
+mode = "0755"
+phase = "pre-packages"
+
+# written by get-docker.sh / older manual setups; a second Signed-By for the same
+# repository makes apt fail
+[bootstrap.files."/etc/apt/sources.list.d/docker.list"]
+state = "absent"
+phase = "pre-packages"
+
+[bootstrap.files."/etc/apt/keyrings/docker.asc"]
+source = "files/apt/docker.asc" # conf.d/linux/files/apt/docker.asc
+phase = "pre-packages"
+
+# One template for Ubuntu (ubuntu, <codename>, amd64) and the NanoPi (debian, bookworm, arm64).
+# os = "linux": exec() below must never render on another OS (plan there would fail).
+[bootstrap.files."/etc/apt/sources.list.d/docker.sources"]
+os = "linux"
+template = true
+phase = "pre-packages"
+content = """
+Types: deb
+URIs: https://download.docker.com/linux/{{ exec(command=". /etc/os-release && echo $ID") }}
+Suites: {{ exec(command=". /etc/os-release && echo ${UBUNTU_CODENAME:-$VERSION_CODENAME}") }}
+Components: stable
+Architectures: {{ exec(command="dpkg --print-architecture") }}
+Signed-By: /etc/apt/keyrings/docker.asc
+"""
+
+[bootstrap.user]
+login_shell = "/usr/bin/zsh"

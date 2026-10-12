@@ -1,0 +1,56 @@
+#cloud-config
+autoinstall:
+  version: 1
+  updates: all
+
+  refresh-installer:
+    update: true
+
+  locale: en_US.UTF-8
+  timezone: Asia/Tokyo
+
+  keyboard:
+    layout: jp
+    variant: ""
+
+  storage:
+    layout:
+      name: lvm
+      sizing-policy: all
+      encrypt: false
+      # encrypt: true
+      # password: "CHANGE_ME_LUKS_PASSPHRASE" # change with plain password
+
+  identity:
+    realname: "eggplants"
+    username: "eggplants"
+    hostname: "eggplants-ThinkPad-X1-Carbon-Gen-9"
+    password: "$6$0PAm9I8jVAUMHgAf$2SM/58YNb2eeN8UyQDnDCfyPoa1athwp3q./ZHKPAJPaTl/o4rSBW2TOz2v6dv/6AvwxI797krJwxXQMMqfl2/"
+
+  ssh:
+    install-server: false
+    allow-pw: false
+
+  early-commands:
+    - apt-get update -y
+
+  apt:
+    preserve_sources_list: false
+    mirror-selection:
+      primary:
+        - country-mirror
+        - uri: "http://jp.archive.ubuntu.com/ubuntu"
+        - uri: "http://archive.ubuntu.com/ubuntu"
+    geoip: true
+    fallback: abort
+
+
+  shutdown: reboot
+  # After the first login, run: ~/.config/mise/bootstrap.sh
+  late-commands:
+    - curtin in-target -- apt-get update -y
+    - curtin in-target -- apt-get install -y ca-certificates curl git
+    - curtin in-target -- su - eggplants -c 'curl -fsSL https://mise.run | sh'
+    - curtin in-target -- su - eggplants -c 'git clone https://github.com/eggplants/mise-bootstrap ~/.config/mise'
+    - curtin in-target -- apt-get autoremove -y
+    - curtin in-target -- apt-get autoclean -y

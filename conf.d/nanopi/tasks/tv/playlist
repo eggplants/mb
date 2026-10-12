@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#MISE description="Export mirakc channels to channels.m3u8 in the current directory"
+#MISE dir="{{ cwd }}"
+set -euo pipefail
+
+ts_host="$(hostname).$(tailscale status --json | jq -r .MagicDNSSuffix)"
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+curl -fsSL -o "$tmp/channels.json" http://localhost:40772/api/channels
+curl -fsSL -o "$tmp/ch2pl.py" \
+  https://gist.githubusercontent.com/eggplants/ca989cea260d03747f0e2a7fcec29fec/raw/ch2pl.py
+python "$tmp/ch2pl.py" "$tmp/channels.json" -e "http://$ts_host:40772" > channels.m3u8
+echo "wrote $PWD/channels.m3u8"

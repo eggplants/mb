@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+#MISE description="Import the GPG secret key from ~/.sec.key, enable the GPG SSH agent and init pass"
+#MISE raw=true
+set -euo pipefail
+
+install -d -m 700 ~/.gnupg
+
+if gpg --list-secret-keys 2>/dev/null | grep -qE '^ *EE3A'; then
+  exit 0
+fi
+if [[ ! -f ~/.sec.key ]]; then
+  echo "setup:gpg: skipped (place your GPG secret key at ~/.sec.key and re-run)" >&2
+  exit 0
+fi
+
+# pinentry asks on this terminal. Without one (mise bootstrap --yes </dev/null, CI), leave
+# GPG_TTY unset: gpg then uses a graphical pinentry where there is one, or says why it failed.
+if GPG_TTY="$(tty)"; then export GPG_TTY; else unset GPG_TTY; fi
+gpgconf --kill gpg-agent
+gpg --import ~/.sec.key
+
+# keygrips of the keys with the authenticate capability
+gpg --with-colons --with-keygrip --list-secret-keys |
+  awk -F: '$1=="sec"||$1=="ssb"{auth=($12~/a/)} $1=="grp"&&auth{print $10; auth=0}' > ~/.gnupg/sshcontrol
+chmod 600 ~/.gnupg/sshcontrol
+gpg-connect-agent updatestartuptty /bye >/dev/null
+
+# pass (installed on Ubuntu) encrypts to the same key
+if command -v pass &>/dev/null && [[ ! -d ~/.password-store ]]; then
+  pass init "$(gpg --with-colons --list-keys | awk -F: '$1=="fpr"{print $10; exit}')"
+fi
+
+rm ~/.sec.key

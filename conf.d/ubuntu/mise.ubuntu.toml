@@ -1,0 +1,66 @@
+# Ubuntu (amd64), headless part. Loads after conf.d/linux (apt base, Docker repository key,
+# login shell); conf.d/desktop is an add-on that loads after this one.
+
+# ruby, node, go, rust, uv, claude, gh, jq, pinact, yt-dlp and two pipx tools
+include = ["../../shared/workstation-tools.toml"]
+
+[settings]
+ruby.compile = false
+# `mise use -g`, `mise bootstrap packages use -g` and `mise dot add` write here, not into config.toml
+write_targets.tools = "~/.config/mise/conf.d/ubuntu/mise.ubuntu.toml"
+write_targets.packages = "~/.config/mise/conf.d/ubuntu/mise.ubuntu.toml"
+write_targets.dotfiles = "~/.config/mise/conf.d/ubuntu/mise.ubuntu.toml"
+
+[tools]
+python = "latest"
+java = "21"
+maven = "latest"
+"aqua:azu/dockerfile-pin" = "latest"
+"pipx:getjmanga" = "latest"
+
+[bootstrap.packages]
+"apt:build-essential" = "latest"
+"apt:gnupg" = "latest"
+"apt:pinentry-tty" = "latest"
+"apt:pass" = "latest"
+"apt:zip" = "latest"
+"apt:unzip" = "latest"
+"apt:unar" = "latest"
+"apt:w3m" = "latest"
+"apt:aria2" = "latest"
+"apt:torsocks" = "latest"
+"apt:ffmpeg" = "latest"
+"apt:imagemagick" = "latest"
+"apt:pkg-config" = "latest"
+"apt:timidity" = "latest"
+"apt:docker-ce-rootless-extras" = "latest"
+"apt:uidmap" = "latest"
+"apt:slirp4netns" = "latest"
+
+[bootstrap.files."/etc/sysctl.d/99-userns.conf"]
+content = "kernel.apparmor_restrict_unprivileged_userns=0\n"
+
+[bootstrap.services."docker.socket"]
+state = "stopped"
+enabled = false
+
+[bootstrap.services.docker]
+state = "stopped"
+enabled = false
+
+[dotfiles]
+"~/.gnupg/gpg-agent.conf" = { source = "dotfiles/gnupg/gpg-agent.conf", mode = "copy", permissions = "0600" }
+"~/.config/environment.d/50-mise.conf" = { source = "dotfiles/environment.d/50-mise.conf" }
+
+[tasks.bootstrap]
+description = "Run imperative setup steps after the declarative bootstrap"
+depends = ["host:check"]
+run = [{ task = "setup:gpg" }, { task = "setup:git" }, { task = "setup:docker" }, { task = "setup:claude" }]
+
+[tasks."autoinstall:validate"]
+description = "Validate docs/autoinstall.yaml of the current checkout"
+dir = "{{ cwd }}"
+run = 'docker run --rm -v "$(git rev-parse --show-toplevel)/docs/autoinstall.yaml:/autoinstall.yaml" ghcr.io/eggplants/validate-ubuntu-autoinstall-docker /autoinstall.yaml -v'
+
+[task_config]
+includes = ["tasks", "../../shared/tasks/gpg", "../../shared/tasks/workstation"]

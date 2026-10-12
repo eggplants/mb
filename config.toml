@@ -1,0 +1,55 @@
+# Base config: loaded on every machine (macOS, Termux, Ubuntu and the NanoPi R6S).
+# Each platform's setup lives in conf.d/<module>/mise.<module>.toml, which mise loads only for
+# the env list pinned in miserc.local.toml (written by bootstrap.sh, never committed):
+#   macos | termux | linux,ubuntu | linux,ubuntu,desktop | linux,nanopi
+# Keep this file free of anything that is wrong on one of the four: no [tools], packages,
+# hooks, services, compose, login shell or /etc files (ci/check.sh enforces this).
+# `mise use -g`, `mise bootstrap packages use -g` and `mise dot add` write into this machine's
+# module (each platform module sets [settings] write_targets), not here.
+min_version = "2026.10.7" # bootstrap.sh checks the same version before it touches anything
+
+# Guard: guard.tera throws unless the env selection is exactly one of the lists above and
+# is meant for this host. mise renders [bootstrap.files] templates before its first change,
+# so a bad selection stops `mise bootstrap` (and plan, status, --dry-run) before step 1.
+# With a valid selection it renders empty and remove_empty keeps the target absent.
+[bootstrap.files."~/.local/state/mise-bootstrap/guard"]
+source = "guard.tera"
+template = true
+remove_empty = true
+
+# The same check for `mise bootstrap --only dotfiles` and `mise dot apply`, which skip
+# [bootstrap.files]. Dotfile templates render before the first change of a real run
+# (not in a dry run); this one writes an empty file.
+[dotfiles."~/.local/state/mise-bootstrap/dotfiles-guard"]
+source = "guard.tera"
+mode = "template"
+
+# zsh plugins (loaded by dotfiles/zshrc) and nano syntax highlighting (dotfiles/nanorc)
+[bootstrap.repos]
+"~/.local/share/zsh/plugins/pure" = { url = "https://github.com/sindresorhus/pure" }
+"~/.local/share/zsh/plugins/zsh-autosuggestions" = { url = "https://github.com/zsh-users/zsh-autosuggestions" }
+"~/.local/share/zsh/plugins/zsh-completions" = { url = "https://github.com/zsh-users/zsh-completions" }
+"~/.local/share/zsh/plugins/fast-syntax-highlighting" = { url = "https://github.com/zdharma-continuum/fast-syntax-highlighting" }
+"~/.local/share/zsh/plugins/history-search-multi-word" = { url = "https://github.com/zdharma-continuum/history-search-multi-word" }
+"~/.local/share/zsh/plugins/zsh-history-substring-search" = { url = "https://github.com/zsh-users/zsh-history-substring-search" }
+"~/.local/share/nano-highlight" = { url = "https://github.com/serialhex/nano-highlight" }
+
+# Dotfiles shared by every machine; platform-only ones stay in conf.d/<module>/.
+[dotfiles]
+"~/.zshenv" = { source = "dotfiles/zshenv" }
+"~/.zshrc" = { source = "dotfiles/zshrc" }
+"~/.nanorc" = { source = "dotfiles/nanorc" }
+# Machines with a GPG key only: with no matching variant (the NanoPi) the entry is skipped.
+"~/.gitconfig" = { source = "dotfiles/gitconfig", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
+
+# ~/.zshrc is a whole-file dotfile that activates mise itself, so zsh = true only adds the
+# shims to ~/.zprofile (what macOS spelled zprofile = "shims"); bash gets both files.
+[bootstrap.mise_shell_activate]
+zsh = true
+bash = true
+
+# Each platform module replaces this task (and runs host:check first); this one only runs
+# when no platform module is loaded.
+[tasks.bootstrap]
+description = "No platform selected"
+run = "echo 'mise-bootstrap: no platform env selected; run: bash ~/.config/mise/bootstrap.sh' >&2; exit 1"

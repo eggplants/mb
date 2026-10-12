@@ -1,0 +1,54 @@
+# ~/.zshenv — managed by mise dotfiles (~/.config/mise/dotfiles/zshenv)
+# One file for every machine: platform-specific lines check $OSTYPE, $TERMUX_VERSION or
+# whether a path exists.
+
+typeset -U path PATH
+if [[ $OSTYPE == darwin* ]]; then
+  # /etc/zprofile (path_helper) reorders PATH for login shells, so ~/.zshrc
+  # prepends these again.
+  path=("$HOME/.local/bin" /opt/homebrew/bin /opt/homebrew/sbin $path)
+else
+  path=("$HOME/.local/bin" $path)
+fi
+# rustup's env script prepends ~/.cargo/bin unless PATH has it. It runs before the line below
+# appends that directory, so ~/.cargo/bin stays first where rustup set it up (macOS).
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
+
+# `go install` / `cargo install` outside mise (Termux: pkg golang, rust); listed even before
+# they exist, so a binary installed later is found without a new shell
+path+=("$HOME/go/bin" "$HOME/.cargo/bin")
+# the `devcontainer` CLI of the VS Code Dev Containers extension
+if [[ $OSTYPE == darwin* ]]; then
+  path+=("$HOME/Library/Application Support/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin")
+elif [[ $OSTYPE == linux-gnu* ]]; then
+  path+=("$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/cli-bin")
+fi
+
+export EDITOR=nano
+export PINACT_KEYRING_ENABLED=true
+if [[ -n ${TERMUX_VERSION-} || $OSTYPE == *android* ]]; then
+  export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk 2>/dev/null)"
+fi
+# rootless Docker (setup:docker on Ubuntu creates this unit)
+if [[ -f $HOME/.config/systemd/user/docker.service ]]; then
+  export DOCKER_HOST="unix://${XDG_RUNTIME_DIR:-/run/user/$UID}/docker.sock"
+fi
+
+# macOS only: shfmt formats in place with 4-space indents
+if [[ $OSTYPE == darwin* ]]; then
+  function shfmt() {
+    command shfmt -i 4 -l -w "$@"
+  }
+fi
+
+# Ubuntu: run wine with a Japanese locale (the desktop module installs wine; the NanoPi has none)
+if [[ $OSTYPE == linux-gnu* ]]; then
+  function wine() {
+    LANG=ja_JP.UTF-8 command wine "$@"
+  }
+fi
+
+# machine-local additions that do not belong in the repo (e.g. PATH lines an installer
+# would otherwise append to this file)
+for _f in "$HOME"/.zshenv.d/*.zsh(N); do source "$_f"; done
+unset _f

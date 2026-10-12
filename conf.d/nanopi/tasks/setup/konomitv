@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+#MISE description="Install KonomiTV and point its recording backend at edcb-bridge"
+#MISE raw=true
+set -euo pipefail
+
+# https://github.com/tsukumijima/KonomiTV/releases
+version=0.14.1
+config=/opt/KonomiTV/config.yaml
+
+if [[ -f /run/setup-nanopi-reboot-required ]]; then
+  echo "setup:konomitv: skipped (rkmppenc drivers were installed; reboot and re-run mise bootstrap)" >&2
+  exit 0
+fi
+
+command -v pm2 &>/dev/null || sudo npm install -g pm2
+
+if [[ ! -f "$config" ]]; then
+  tmp="$(mktemp -d)"
+  trap 'rm -rf "$tmp"' EXIT
+  curl -fL --retry 3 -o "$tmp/KonomiTV-Installer-ARM.elf" \
+    "https://github.com/tsukumijima/KonomiTV/releases/download/v$version/KonomiTV-Installer-ARM.elf"
+  chmod +x "$tmp/KonomiTV-Installer-ARM.elf"
+  (cd "$tmp" && ./KonomiTV-Installer-ARM.elf) <<'EOS'
+4
+/opt/KonomiTV
+Mirakurun
+http://127.0.0.1:40772/
+rkmppenc
+/mnt/hdd1/recorded
+
+/mnt/hdd1/TV-Capture
+
+EOS
+fi
+
+# Recording reservations go through EDCB (edcb-bridge);
+# live streams are still received from mirakc directly.
+before="$(sha256sum "$config")"
+sudo sed -i \
+  -e "s|^\(\s*backend:\).*|\1 'EDCB'|" \
+  -e "s|^\(\s*always_receive_tv_from_mirakurun:\).*|\1 true|" \
+  -e "s|^\(\s*edcb_url:\).*|\1 'tcp://127.0.0.1:4510/'|" \
+  -e "s|^\(\s*mirakurun_url:\).*|\1 'http://127.0.0.1:40772/'|" \
+  "$config"
+if [[ "$(sha256sum "$config")" != "$before" ]]; then
+  grep -E '^\s*(backend|always_receive_tv_from_mirakurun|edcb_url|mirakurun_url):' "$config"
+  sudo pm2 restart KonomiTV
+fi

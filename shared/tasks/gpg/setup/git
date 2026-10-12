@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#MISE description="Write user.email/signingkey and gpg.program to ~/.gitconfig.local and log in to gh"
+#MISE raw=true
+set -euo pipefail
+
+if gpg --list-secret-keys 2>/dev/null | grep -q '^sec'; then
+  # fingerprint of the last secret key, and the email of the first uid
+  key="$(gpg --list-secret-keys --with-colons | awk -F: '$1=="sec"{s=1;next} s&&$1=="fpr"{k=$10;s=0} END{print k}')"
+  email="$(gpg --list-keys --with-colons | awk -F: '$1=="uid"{print $10; exit}' | sed 's/.*<\(.*\)>.*/\1/')"
+  git config --file ~/.gitconfig.local user.signingkey "$key"
+  git config --file ~/.gitconfig.local user.email "$email"
+else
+  echo "setup:git: no GPG secret key; skipped user.email/user.signingkey" >&2
+fi
+# GUI apps (VS Code started from the Dock, …) do not get the shell PATH: record gpg's
+# absolute path here instead of in the shared gitconfig
+if gpg_bin="$(command -v gpg)"; then
+  git config --file ~/.gitconfig.local gpg.program "$gpg_bin"
+fi
+
+if ! gh auth status --hostname github.com &>/dev/null; then
+  # the device flow waits for the code to be entered in a browser; without a terminal it hangs
+  if [[ -t 0 ]]; then
+    gh auth login --hostname github.com --git-protocol https --web
+  else
+    echo "setup:git: not logged in to GitHub; run \`gh auth login --web\` from a terminal" >&2
+  fi
+fi

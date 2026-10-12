@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Grant Termux access to shared storage (~/storage)"
+#MISE raw=true
+set -euo pipefail
+
+[[ -d ~/storage ]] && exit 0
+termux-setup-storage ||
+  echo "setup:storage: termux-setup-storage failed; run it from the Termux app" >&2

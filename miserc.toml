@@ -1,0 +1,5 @@
+# Committed and shared by every machine. Do not set `env` here: each machine pins its
+# platform in miserc.local.toml (gitignored, written by bootstrap.sh), whose env list
+# replaces any list set here. Pin auto_env so mise 2027.6+ does not start loading
+# config.<os>.toml / mise.<os>.toml files on its own.
+auto_env = false

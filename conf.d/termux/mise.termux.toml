@@ -1,0 +1,58 @@
+[settings]
+cargo.binstall = false
+# Start file tasks as `<interpreter> <file>` (with /usr/bin/env stripped from the shebang):
+# Termux has no /usr/bin/env without termux-exec, and tasks/host/check starts with it.
+use_file_shell_for_executable_tasks = true
+# `mise use -g`, `mise bootstrap packages use -g` and `mise dot add` write here, not into config.toml
+write_targets.tools = "~/.config/mise/conf.d/termux/mise.termux.toml"
+write_targets.packages = "~/.config/mise/conf.d/termux/mise.termux.toml"
+write_targets.dotfiles = "~/.config/mise/conf.d/termux/mise.termux.toml"
+
+[tools]
+"cargo:termscp" = "latest"
+
+# "pkg:" is the Termux package manager plugin in plugins/pkg (repo root), linked by bootstrap.sh
+[bootstrap.packages]
+"pkg:android-tools" = "latest"
+"pkg:ca-certificates" = "latest"
+"pkg:cmake" = "latest"
+"pkg:curl" = "latest"
+"pkg:dbus" = "latest"
+"pkg:ffmpeg" = "latest"
+"pkg:git" = "latest"
+"pkg:gnupg" = "latest"
+"pkg:golang" = "latest"
+"pkg:gh" = "latest"
+"pkg:imagemagick" = "latest"
+"pkg:jq" = "latest"
+"pkg:make" = "latest"
+"pkg:nano" = "latest"
+"pkg:perl" = "latest"
+"pkg:pinentry" = "latest"
+"pkg:pkg-config" = "latest"
+"pkg:rust" = "latest"
+"pkg:samba" = "latest"
+"pkg:termux-api" = "latest"
+"pkg:unar" = "latest"
+"pkg:which" = "latest"
+"pkg:wget" = "latest"
+"pkg:w3m" = "latest"
+"pkg:zsh" = "latest"
+
+[dotfiles]
+"~/.hushlogin" = { source = "dotfiles/hushlogin" }
+"~/.gnupg/gpg-agent.conf" = { source = "dotfiles/gnupg/gpg-agent.conf", mode = "copy", permissions = "0600" }
+
+# mise installs [tools] before plugin packages; cargo: tools need rust, perl,
+# make, pkg-config, samba (smbclient) and dbus from pkg first.
+# Hooks get no MISE_ENV, so the child mise is given the env selection explicitly.
+[bootstrap.hooks]
+pre-tools = "mise -E {{ mise_env | join(sep=\",\") }} bootstrap packages apply --yes"
+
+[tasks.bootstrap]
+description = "Run imperative setup steps after the declarative bootstrap"
+depends = ["host:check"]
+run = [{ task = "setup:shell" }, { task = "setup:storage" }, { task = "setup:gpg" }, { task = "setup:git" }]
+
+[task_config]
+includes = ["tasks", "../../shared/tasks/gpg"]

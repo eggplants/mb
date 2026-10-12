@@ -1,0 +1,3 @@
+[package-manager]
+requires = ["pkg", "apt-get", "dpkg-query"]
+supports_version_pins = true

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+#MISE description="Fail unless this machine's env selection (miserc.local.toml) is valid and matches this host"
+#MISE hide=true
+# Runs before every platform's bootstrap task and before the destructive NanoPi tasks
+# (#MISE depends=["host:check"]), so `mise bootstrap --only task`, `mise run bootstrap` and
+# `mise run hdd:init` cannot run on the wrong host. bootstrap.sh --detect holds the host tests.
+set -euo pipefail
+root="$(cd "$(dirname "$0")/../.." && pwd)"
+host="$(bash "$root/bootstrap.sh" --detect)"
+sel="${MISE_ENV:-}"
+case "$sel" in
+  macos) want=macos ;;
+  termux) want=termux ;;
+  linux,ubuntu | linux,ubuntu,desktop) want=ubuntu ;;
+  linux,nanopi) want=nanopi ;;
+  *)
+    echo "host:check: env selection [$sel] is not one of: macos | termux | linux,ubuntu | linux,ubuntu,desktop | linux,nanopi" >&2
+    exit 1
+    ;;
+esac
+[[ "$host" == "$want" ]] || {
+  echo "host:check: env [$sel] is for $want, but this host is $host" >&2
+  exit 1
+}
