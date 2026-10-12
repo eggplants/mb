@@ -54,10 +54,11 @@ mb             # apply
 | `dotfiles/` | Shared dotfiles: `zshrc` (with `mb()`), `zshenv`, `nanorc`, `gitconfig` |
 | `shared/workstation-tools.toml` | The `[tools]` that macOS and Ubuntu share, pulled in by both modules with `include` |
 | `shared/tasks/gpg/` | `setup:gpg`, `setup:git` (macOS, Termux, Ubuntu) |
-| `shared/tasks/workstation/` | `setup:claude`, `setup:vscode` (macOS, Ubuntu) |
+| `shared/tasks/claude/` | `setup:claude` (macOS, Termux, Ubuntu) |
+| `shared/tasks/workstation/` | `setup:vscode` (macOS, Ubuntu) |
 | `conf.d/linux/` | Ubuntu and NanoPi: the apt base, including Docker CE; the Docker apt repo (one `docker.sources` template); the login shell |
 | `conf.d/macos/` | `[tools]`; `brew:`, `brew-cask:` and `mas:` packages; the login shell; the colima LaunchAgent; gpg-agent and Ghostty dotfiles; the `stop-brew-colima.sh` hook; `setup:macos`, `setup:docker` |
-| `conf.d/termux/` | `pkg:` packages, `cargo:termscp`, hushlogin and gpg-agent dotfiles, the `pre-tools` hook, `setup:shell`, `setup:storage` |
+| `conf.d/termux/` | `pkg:` packages, `cargo:termscp`, `pipx:claude-statusbar`, hushlogin and gpg-agent dotfiles, the `pre-tools` hook, `setup:shell`, `setup:storage`, `setup:claude-code` |
 | `conf.d/ubuntu/` | Headless Ubuntu: `[tools]`, apt packages, rootless Docker, gpg-agent and `environment.d` dotfiles, `setup:docker`, `autoinstall:validate` |
 | `conf.d/desktop/` | Ubuntu Desktop add-on: GUI apt packages, the WineHQ repo, the vendor `.deb` hook (`install-vendor-debs.sh`), Ghostty and Wine dotfiles, the TiMidity user unit, GNOME dconf, `setup:desktop` |
 | `conf.d/nanopi/` | apt sources (Debian mirror, Tailscale, Grafana); system files; services; `[bootstrap.compose.tv]`; the `install-debs.sh` hook; `authorized_keys`; `setup:system`, `setup:docker`, `setup:konomitv`, `hdd:init`, `tv:playlist` |
@@ -126,12 +127,18 @@ mb             # apply
 - **`pkg:` plugin.**
   - mise reports Termux as `android`, where the built-in `apt` manager is skipped, so `plugins/pkg` adds a `pkg:` manager.
   - `[bootstrap.plugins]` only takes Git URLs, so `bootstrap.sh` runs `mise plugins link --force pkg ~/.config/mise/plugins/pkg` instead. Run that again by hand if the link is lost.
-- **pkg vs mise tools.** Prebuilt mise tools target glibc Linux, not Android, so everything comes from `pkg`. Only `cargo:` tools, which are built locally, go in `[tools]`. An example is `termscp`, which `pkg` lacks. `cargo.binstall = false`.
+  - Termux's `*-repo` packages (`glibc-repo`, `x11-repo`, `tur-repo`, …) add apt sources. The plugin installs them first and runs `apt-get update`, then the rest, so a package from such a repo (e.g. `glibc-runner`) installs in the same apply.
+- **pkg vs mise tools.** Prebuilt mise tools target glibc Linux, not Android, so everything comes from `pkg`. Only tools that are built or installed locally go in `[tools]`: `cargo:` tools (e.g. `termscp`, which `pkg` lacks; `cargo.binstall = false`) and pure-Python `pipx:` tools (e.g. `claude-statusbar`), which uv from `pkg` installs on `pkg`'s python.
 - **Packages before tools.**
-  - `mise bootstrap` installs `[tools]` before plugin packages, but `cargo:termscp` needs rust, perl, make, pkg-config, samba and dbus from `pkg`.
+  - `mise bootstrap` installs `[tools]` before plugin packages, but `cargo:termscp` needs rust, perl, make, pkg-config, samba and dbus, and `pipx:` tools need python and uv, from `pkg`.
   - So the `pre-tools` hook runs `mise -E termux bootstrap packages apply --yes` first.
   - Hooks get no `MISE_ENV`, so the hook passes the selection explicitly, rendered from `{{ mise_env }}`.
 - **Login shell.** There is no `[bootstrap.user]` on Termux. It would use `sudo`, `/etc/shells` and `chsh -s <path>`, but Termux's `chsh` takes a shell name and only links `~/.termux/shell`. So `setup:shell` runs `chsh -s zsh`. A dotfile symlink would fail before zsh is installed.
+- **Claude Code.** No Android build exists and mise's `claude` is a glibc binary, so `setup:claude-code` runs [claude-code-android](https://github.com/ferrumclaudepilgrim/claude-code-android)'s `install.sh` (Path A), pinned to a commit and checked against a sha256; bump both together.
+  - `glibc-repo`, `glibc-runner` and `patchelf-glibc` are `pkg:` packages; the task stops if they are missing, so install.sh never installs them itself. install.sh still runs `apt-get full-upgrade`, then patches the official linux-arm64 binary, and writes a wrapper at `$PREFIX/bin/claude` that updates claude once a day and sets `autoUpdates: false` in `~/.claude/settings.json`.
+  - The task answers both installer questions with `n` (keep `$PREFIX/etc` configs, no extra packages) and skips once `~/.local/share/claude/.installer-rev` matches the pinned commit.
+  - Its wrapper points Claude Code's own DNS at 8.8.8.8 / 8.8.4.4. Run it from a plain Termux shell, not inside a claude session.
+  - `setup:claude` (the claude-statusbar statusLine, shared with macOS and Ubuntu) runs after it, so `~/.claude/settings.json` gets both keys.
 - **Task shebangs.** Termux has no `/usr/bin/env` unless termux-exec is active. With `use_file_shell_for_executable_tasks = true`, mise starts a file task as `<interpreter> <file>`, taking the interpreter from the shebang with `/usr/bin/env` stripped. So every task, shared ones included, uses `#!/usr/bin/env bash`. Scripts run outside mise are started with `bash <script>` (for example `bash ~/.config/mise/bootstrap.sh`).
 
 #### Ubuntu

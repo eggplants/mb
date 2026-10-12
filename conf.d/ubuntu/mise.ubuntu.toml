@@ -63,4 +63,4 @@ dir = "{{ cwd }}"
 run = 'docker run --rm -v "$(git rev-parse --show-toplevel)/docs/autoinstall.yaml:/autoinstall.yaml" ghcr.io/eggplants/validate-ubuntu-autoinstall-docker /autoinstall.yaml -v'
 
 [task_config]
-includes = ["tasks", "../../shared/tasks/gpg", "../../shared/tasks/workstation"]
+includes = ["tasks", "../../shared/tasks/gpg", "../../shared/tasks/claude", "../../shared/tasks/workstation"]

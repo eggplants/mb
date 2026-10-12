@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#MISE description="Install Claude Code via claude-code-android (patched linux-arm64 binary + wrapper)"
+set -euo pipefail
+
+# Pinned claude-code-android install.sh (Path A). To upgrade, bump the commit and the
+# sha256 together. The wrapper it writes to $PREFIX/bin/claude updates claude itself daily.
+rev=cf3040241a437356ad1a97b4bb7d1ba3ef3250b2
+sha256=307ee7ef73055fc6a8c6b55cb8c9eadf16ec945ef9207e4f22f5e79f38d1ccaa
+stamp="$HOME/.local/share/claude/.installer-rev"
+
+# Installed by this revision already: nothing to do. A new revision re-runs install.sh,
+# which only refreshes the launcher of an existing install (no re-download).
+if [[ -f "$PREFIX/bin/claude" && ! -L "$PREFIX/bin/claude" && "$(cat "$stamp" 2>/dev/null)" == "$rev" ]]; then
+  exit 0
+fi
+
+# glibc-runner and patchelf-glibc come from [bootstrap.packages]; stop here rather than let
+# install.sh install them itself.
+for f in "$PREFIX/glibc/bin/patchelf" "$PREFIX/glibc/lib/ld-linux-aarch64.so.1"; do
+  [[ -e "$f" ]] || {
+    echo "setup:claude-code: $f is missing; run 'mise bootstrap packages apply' (glibc-runner, patchelf-glibc)" >&2
+    exit 1
+  }
+done
+
+tmp="$(mktemp -d "${TMPDIR:-$PREFIX/tmp}/claude-code-android.XXXXXX")"
+trap 'rm -rf "$tmp"' EXIT
+curl -fsSL "https://raw.githubusercontent.com/ferrumclaudepilgrim/claude-code-android/$rev/install.sh" -o "$tmp/install.sh"
+echo "$sha256  $tmp/install.sh" | sha256sum -c --quiet -
+
+# Q1 "Fresh Termux?": n keeps customized $PREFIX/etc configs during its apt-get full-upgrade.
+# Q2 "Recommended packages?": n, packages are declared in mise.termux.toml.
+printf 'n\nn\n' | bash "$tmp/install.sh"
+mkdir -p "${stamp%/*}"
+echo "$rev" >"$stamp"

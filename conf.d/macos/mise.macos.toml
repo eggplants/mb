@@ -160,4 +160,4 @@ run = [
 ]
 
 [task_config]
-includes = ["tasks", "../../shared/tasks/gpg", "../../shared/tasks/workstation"]
+includes = ["tasks", "../../shared/tasks/gpg", "../../shared/tasks/claude", "../../shared/tasks/workstation"]
