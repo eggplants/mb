@@ -2,15 +2,16 @@
 
 ## What this repo is
 
-The global [mise](https://mise.jdx.dev) config for four kinds of machine:
+The global [mise](https://mise.jdx.dev) config for five kinds of machine:
 - macOS (Apple Silicon);
 - [Termux](https://termux.dev);
 - Ubuntu, Desktop or headless;
-- a NanoPi R6S TV server (Debian 12 / FriendlyELEC image, aarch64).
+- a NanoPi R6S TV server (Debian 12 / FriendlyELEC image, aarch64);
+- Windows (x64, PowerShell 7).
 
-Every machine clones it as `~/.config/mise`. `mise bootstrap` then sets the machine up from `config.toml`, which every machine loads, plus the modules in `conf.d/` that the machine's env list selects.
+Every machine clones it as `~/.config/mise` (`%USERPROFILE%\.config\mise` on Windows). `mise bootstrap` then sets the machine up from `config.toml`, which every machine loads, plus the modules in `conf.d/` that the machine's env list selects.
 
-It replaces eggplants/setup-macos.sh, setup-termux.sh, setup-ubuntu.sh and setup-nanopi; their history stays in those (archived) repos.
+It replaces eggplants/setup-macos.sh, setup-termux.sh, setup-ubuntu.sh, setup-nanopi and SetupWindows.ps1; their history stays in those (archived) repos.
 
 ## Apply the config
 
@@ -21,9 +22,11 @@ mb             # apply
 
 `mb` is a zsh function in `dotfiles/zshrc`. It runs `git pull --ff-only` in `~/.config/mise` (on failure it warns and applies the local checkout), then `mise bootstrap` from `~`. Before that, it refuses `-E`/`--env` (and its hidden alias `-P`/`--profile`), a set `MISE_ENV`, `MISE_PROFILE` or `MISE_ENVIRONMENT`, `-C`/`--cd` (another directory would add its project config to the run), and any `unapply` other than `unapply desktop`, without pulling. Without the zsh setup, run `cd ~ && mise bootstrap` with no `-E`, `-C` or `MISE_ENV`.
 
+On Windows, `mb` is the PowerShell function in `conf.d/windows/pwsh/profile.ps1`, with the same checks; it refuses every `unapply`.
+
 ## Env selection
 
-`~/.config/mise/miserc.local.toml` pins the env list. It is gitignored and written by `bootstrap.sh` on the first run (it never overwrites an existing one). For each name in the list, `conf.d/<name>/mise.<name>.toml` loads after `config.toml`, in list order, and a later module wins. That order holds only while mise runs outside `conf.d/` (see Gotchas).
+`~/.config/mise/miserc.local.toml` pins the env list. It is gitignored and written by `bootstrap.sh` (`bootstrap.ps1` on Windows) on the first run (it never overwrites an existing one). For each name in the list, `conf.d/<name>/mise.<name>.toml` loads after `config.toml`, in list order, and a later module wins. That order holds only while mise runs outside `conf.d/` (see Gotchas).
 
 | Machine | `env =` | Detected by (tested in this order) |
 |---|---|---|
@@ -32,12 +35,13 @@ mb             # apply
 | NanoPi R6S | `["linux", "nanopi"]` | Linux, and `/proc/device-tree/model` contains `nanopi` in any case |
 | Ubuntu Desktop | `["linux", "ubuntu", "desktop"]` | `/etc/os-release` has `ID=ubuntu`. `bootstrap.sh` adds desktop when `ubuntu-desktop-minimal` is installed. |
 | Ubuntu (headless) | `["linux", "ubuntu"]` | the same, without desktop. `DESKTOP=1` / `DESKTOP=0` override the choice. |
+| Windows | `["windows"]` | `$env:OS` is `Windows_NT` (`bootstrap.ps1`, `tasks/host/check.ps1`); `os()` is `windows` in `guard.tera` |
 
 - **The order matters.**
   - `linux` comes first: it is the shared base, and the platform module can override any key in it.
   - `desktop` comes last: its `[tasks.bootstrap]` only adds `depends_post`, and that survives only when desktop is listed after ubuntu.
-- **These five lists are the only valid selections.**
-  - `guard.tera` throws on any other list, or on the wrong host, before step 1 of `mise bootstrap`, `plan`, `status` or `--dry-run`.
+- **These six lists are the only valid selections.**
+  - `guard.tera` throws on any other list, or on the wrong host, before step 1 of `mise bootstrap`, `plan`, `status` or `--dry-run`. On Windows only its `[dotfiles]` copy runs, so there it covers real runs, not `plan`, `status` or `--dry-run`.
   - `host:check` does the same for the task step and for destructive tasks.
 - **`-E` (alias `-P`), `MISE_ENV`, `MISE_PROFILE`, `MISE_ENVIRONMENT` and a project `.miserc*.toml` replace the list; they never add to it.** Never use them, and run mise from `~`. Unknown env names are silently ignored.
 - **`miserc.toml` (committed) only pins `auto_env = false`.** Never set `env` in it.
@@ -47,10 +51,13 @@ mb             # apply
 | Path | Purpose |
 |------|---------|
 | `config.toml` | Every machine. It holds: `min_version`; the guard entries; `[bootstrap.repos]` for the zsh plugins and nano syntax; the shared `[dotfiles]`; shell activation; and a fallback `bootstrap` task that fails. The shared dotfiles are zshrc, zshenv and nanorc, plus gitconfig through `variants` on macOS, Termux and Ubuntu. |
-| `guard.tera` | Renders empty when the env list is one of the five and matches this host; otherwise `throw()` stops mise before it changes anything |
+| `guard.tera` | Renders empty when the env list is one of the six and matches this host; otherwise `throw()` stops mise before it changes anything |
 | `miserc.toml` | `auto_env = false` |
 | `bootstrap.sh` | First run only: detects the platform, installs git and mise, clones the repo (unless present), pins `miserc.local.toml` (unless present), runs the platform pre-steps (Termux: link the `pkg` plugin; NanoPi: `hdd:init`), then `exec mise bootstrap` (with `--update` on Ubuntu and the NanoPi). Extra arguments go to `mise bootstrap`. |
+| `bootstrap.ps1` | The same for Windows: installs Git, mise and PowerShell 7 with WinGet, checks mise against `min_version`, clones, pins `env = ["windows"]`, then `mise bootstrap` |
 | `tasks/host/check` | `host:check` (hidden): fails unless `MISE_ENV` is a valid list that matches this host. `bash tasks/host/check --detect` prints the host's platform. |
+| `tasks/host/check.ps1` | The Windows twin of `tasks/host/check`: mise runs it as `host:check` there. It must stay non-executable, or Linux and macOS list it as a second task. |
+| `.gitattributes` | LF checkouts, also from Git for Windows |
 | `dotfiles/` | Shared dotfiles: `zshrc` (with `mb()`), `zshenv`, `nanorc`, `gitconfig` |
 | `shared/workstation-tools.toml` | The `[tools]` that macOS and Ubuntu share, pulled in by both modules with `include` |
 | `shared/tasks/gpg/` | `setup:gpg`, `setup:git` (macOS, Termux, Ubuntu) |
@@ -61,6 +68,7 @@ mb             # apply
 | `conf.d/termux/` | `pkg:` packages, `cargo:termscp`, `pipx:claude-statusbar`, hushlogin and gpg-agent dotfiles, the `pre-tools` hook, `setup:shell`, `setup:storage`, `setup:claude-code` |
 | `conf.d/ubuntu/` | Headless Ubuntu: `[tools]`, apt packages, rootless Docker, gpg-agent and `environment.d` dotfiles, `setup:docker`, `autoinstall:validate` |
 | `conf.d/desktop/` | Ubuntu Desktop add-on: GUI apt packages, the WineHQ repo, the vendor `.deb` hook (`install-vendor-debs.sh`), Ghostty and Wine dotfiles, the TiMidity user unit, GNOME dconf, `setup:desktop` |
+| `conf.d/windows/` | `winget:` packages (from SetupWindows.ps1's `winget-packages.json`); the PowerShell 7 profile (`pwsh/profile.ps1`, with `mb`); `bin/Sign.ps1`; `setup:pwsh`, `setup:nano` |
 | `conf.d/nanopi/` | apt sources (Debian mirror, Tailscale, Grafana); system files; services; `[bootstrap.compose.tv]`; the `install-debs.sh` hook; `authorized_keys`; `setup:system`, `setup:docker`, `setup:konomitv`, `hdd:init`, `tv:playlist` |
 | `compose/` | NanoPi Compose project `tv`: mirakc, MariaDB, EPGStation, edcb-bridge. `scanned/` and EPGStation's `data/`, `thumbnail/` and `logs/` are generated and gitignored. |
 | `plugins/pkg/` | Package manager plugin that adds the `pkg:` manager for Termux (`pkg` / `dpkg-query`) |
@@ -74,12 +82,14 @@ mb             # apply
 
 - **Repo = global config, split by env.** Relative `source` paths resolve from the folder of the file that declares them: `~/.config/mise` for `config.toml`, `conf.d/<m>/` for a module. Tools in `[tools]` are global.
 - **Declarative first, tasks for the rest.** Use `[bootstrap.*]` and `[dotfiles]` when mise can check the state. Hooks and the `bootstrap` task run on every `mise bootstrap`, so they must be idempotent: guard every step.
-- **`config.toml` holds only what is right on all four platforms.** It has no `[tools]`, packages, hooks, services, compose, login shell, `[settings]` or `/etc` files, and `ci/check.sh` enforces this.
+- **`config.toml` holds only what is right on all five platforms.** It has no `[tools]`, packages, hooks, services, compose, login shell, `[settings]` or `/etc` files, and `ci/check.sh` enforces this.
+  - `[bootstrap.files]` and `[bootstrap.directories]` fail on Windows, so any entry in `config.toml` needs `os = "unix"`, as the guard has.
+  - On Windows the zsh dotfiles, the zsh plugin repos and the bash/zsh activation are inert; `~/.nanorc` and the nano-highlight repo serve nano-win.
 - **Fail closed.** These checks stop a wrong or missing selection:
-  - `guard.tera`, from `[bootstrap.files]`, and a `[dotfiles]` copy for `--only dotfiles` and `mise dot apply`;
+  - `guard.tera`, from `[bootstrap.files]` (not on Windows), and a `[dotfiles]` copy for `--only dotfiles` and `mise dot apply`;
   - `host:check`, which every platform's `bootstrap` task and every destructive task depend on;
   - `mb()`;
-  - `bootstrap.sh`, which refuses a set `MISE_ENV`, `MISE_PROFILE` or `MISE_ENVIRONMENT`, and changes to `~`.
+  - `bootstrap.sh` and `bootstrap.ps1`, which refuse a set `MISE_ENV`, `MISE_PROFILE` or `MISE_ENVIRONMENT`, and change to `~`.
 - **`[tools]` per module.** Termux cannot run glibc builds, and the NanoPi needs almost none.
   - The 12 tools that macOS and Ubuntu share live in `shared/workstation-tools.toml`, which both modules `include`. It may hold only `[tools]`, and a module's own entry wins over it.
   - Versions that differ stay in the modules: python 3.14.2 and java latest on macOS, python latest and java 21 on Ubuntu.
@@ -172,6 +182,23 @@ mb             # apply
   - It, like `setup:system` (which removes the `pi` user), has `#MISE depends=["host:check"]`.
 - **Runtime data lives in the checkout.** `compose/scanned/` and EPGStation's `data/`, `thumbnail/` and `logs/` are gitignored and stay in place across updates.
 
+#### Windows
+
+- **WinGet.** Every package is a `winget:` entry; mise skips them elsewhere.
+  - mise checks with `winget list --id <id> --exact` and installs silently. Installers may still raise UAC, so run `mb` as yourself, not as Administrator.
+  - mise cannot uninstall or prune `winget:` packages: removing an entry leaves the package installed.
+  - The Store app VLC is the msstore ID `XPDM1ZW6815MQM`.
+  - Left out of SetupWindows.ps1's list: WinGet itself (`Microsoft.AppInstaller`) and its dependencies (`Microsoft.UI.Xaml.*`, `Microsoft.VCLibs.Desktop.14`), and `RustDesk.RustDesk`, which is no longer in the winget source.
+- **First run.** `bootstrap.ps1` installs Git, mise and PowerShell 7 before `mise bootstrap`, and reloads `Path`: the repos step needs git, and the `.ps1` tasks need `pwsh` on the `Path` that mise starts with.
+  - WinGet's `jdx.mise` can trail `min_version`. `bootstrap.ps1` then tries `winget upgrade` and stops with a hint to install mise by hand.
+  - It uses `throw`, not `exit`, because it usually runs as a script block, where `exit` would close the shell.
+- **Tasks are `.ps1` files.** mise starts them with `pwsh -File` and names `setup/pwsh.ps1` `setup:pwsh`. They are not executable, so on Linux and macOS they are not tasks at all, and `ci/check.sh` cannot run them. A bash task with a shebang would be a task on Windows too, and `bash` there may be WSL's, so the shared bash tasks are not included.
+- **PowerShell profile.** `$PROFILE` lives under Documents, which OneDrive can move. So `setup:pwsh` resolves the folder, then adds one line that dot-sources `conf.d/windows/pwsh/profile.ps1` from the repo. Machine-local lines go in `$PROFILE` itself.
+  - The profile is for PowerShell 7 only; Windows PowerShell 5.1 is left alone.
+  - It puts `~/.local/bin` (nano) and `conf.d/windows/bin` (`Sign.ps1`, formerly `C:\Scripts`) on `PATH`, and activates mise.
+- **nano.** WinGet's `GNU.Nano` is 2.7.5, so `setup:nano` downloads the newest nano-win build to `~/.local/bin/nano.exe` and records the archive name, so it only downloads again when a newer build appears.
+- **No CI on Windows.** `ci/check.sh` dry-runs the `windows` selection on Linux (all `winget:` entries skipped) and greps the `.ps1` guard copies. Nothing runs the PowerShell code.
+
 ## Gotchas
 
 - **Module-relative paths.**
@@ -190,19 +217,19 @@ mb             # apply
 - **No `# MISE` comments in task files.** A comment line that starts with `# MISE` is parsed as a `#MISE` header.
 - **A new platform module needs `write_targets`,** or `mise use -g` writes into `config.toml`.
 - **`mise dot add` saves the file under `~/.dotfiles`** (mise's `dotfiles.root`), even though the entry goes into the module. Pass `--source ~/.config/mise/conf.d/<platform>/dotfiles/<name>` to keep the file in this repo.
-- **Keep the guard copies in sync.** The allowed lists appear in `guard.tera`, `tasks/host/check`, `bootstrap.sh` and `ci/check.sh`. The host tests are in `tasks/host/check` and `bootstrap.sh` (shell) and `guard.tera` (Tera); `ci/check.sh` checks all three for the same markers.
+- **Keep the guard copies in sync.** The allowed lists appear in `guard.tera`, `tasks/host/check`, `tasks/host/check.ps1`, `bootstrap.sh`, `bootstrap.ps1` and `ci/check.sh`. The host tests are in `tasks/host/check` and `bootstrap.sh` (shell), the `.ps1` twins (PowerShell, Windows only) and `guard.tera` (Tera); `ci/check.sh` checks them for the same markers.
   - A new destructive task gets `#MISE depends=["host:check"]`.
   - The guard covers only runs that include files, dotfiles or the `bootstrap` task. An explicit wrong `-E` with any other `--only` selection (packages, services, compose, tools, repos, user, linux-systemd-units, mise-shell-activate, …) runs unchecked.
   - The dotfile copy of the guard writes an empty `~/.local/state/mise-bootstrap/dotfiles-guard`, which shows up in `mise dot status`.
-- **Unapplying this machine's own env is destructive.** `mise bootstrap unapply <module>` removes the files, dotfiles, directories and user services that the module declares; mise only asks for confirmation (or not, with `--yes`). For example, `unapply nanopi` removes `~/.ssh/authorized_keys`. Only `mb unapply desktop` is supported.
+- **Unapplying this machine's own env is destructive.** `mise bootstrap unapply <module>` removes the files, dotfiles, directories and user services that the module declares; mise only asks for confirmation (or not, with `--yes`). For example, `unapply nanopi` removes `~/.ssh/authorized_keys`. Only `mb unapply desktop` is supported, and nothing on Windows.
   - The shared dotfiles survive, because `config.toml` still declares them.
 - **Never run `git clean -x` in `~/.config/mise` on the NanoPi.** It deletes the gitignored runtime data under `compose/`.
 - **`min_version`.** `config.toml` requires mise 2026.10.7 or newer.
-  - An older mise fails on every call, including the shell hook. Termux gets mise from `pkg`.
+  - An older mise fails on every call, including the shell hook. Termux gets mise from `pkg`, Windows from WinGet (which can lag).
   - Bump `min_version` and `MISE_VERSION` in `check.yml` together.
 - **Previewing another platform.** On this host the guard rejects `mise -E <other platform>`, and that is intended. To preview, run `bash ci/check.sh`: it dry-runs every selection from a copy with the host test stripped.
 - **macOS `plan` and `status` need Ruby 3 or newer on `PATH`**, to evaluate the `openai/tools` tap cask: mise's ruby, as in an activated shell (`/usr/bin/ruby` is 2.6). They also call the GitHub API: without `gh auth login` or a `GITHUB_TOKEN`, the 60-requests-an-hour anonymous limit applies.
-- **History.** For files merged from the four repos, use `git log -- <path>` or `git blame -C`. `--follow` gets confused by the near-identical imported siblings.
+- **History.** For files merged from the old repos, use `git log -- <path>` or `git blame -C`. `--follow` gets confused by the near-identical imported siblings.
 - **Fix forward; do not `git revert` old commits.** Before the copies were merged, a fix touched one platform's copy. Git's rename detection carries a revert of such a commit into the shared file, without a conflict: reverting "fix: write the authentication keygrip to sshcontrol on macOS" rewrites `shared/tasks/gpg/setup/gpg` for Termux and Ubuntu too. If you must revert, check `git show --stat` before pushing.
 
 ## Check

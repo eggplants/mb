@@ -1,0 +1,61 @@
+[settings]
+write_targets.tools = "~/.config/mise/conf.d/windows/mise.windows.toml"
+write_targets.packages = "~/.config/mise/conf.d/windows/mise.windows.toml"
+write_targets.dotfiles = "~/.config/mise/conf.d/windows/mise.windows.toml"
+
+[bootstrap.packages]
+"winget:Git.Git" = "latest"
+"winget:jdx.mise" = "latest"
+"winget:Microsoft.PowerShell" = "latest"
+# shell and terminal
+"winget:JanDeDobbeleer.OhMyPosh" = "latest"
+"winget:Microsoft.WindowsTerminal" = "latest"
+# development
+"winget:Docker.DockerDesktop" = "latest"
+"winget:Microsoft.VisualStudio.2022.Community" = "latest"
+"winget:Microsoft.VisualStudioCode" = "latest"
+"winget:Microsoft.WingetCreate" = "latest"
+"winget:Python.Launcher" = "latest"
+"winget:Python.Python.3.10" = "latest"
+# runtimes
+"winget:Microsoft.DotNet.DesktopRuntime.6" = "latest"
+"winget:Microsoft.VCRedist.2008.x64" = "latest"
+"winget:Microsoft.VCRedist.2008.x86" = "latest"
+"winget:Microsoft.VCRedist.2010.x64" = "latest"
+"winget:Microsoft.VCRedist.2010.x86" = "latest"
+"winget:Microsoft.VCRedist.2012.x64" = "latest"
+"winget:Microsoft.VCRedist.2012.x86" = "latest"
+"winget:Microsoft.VCRedist.2013.x64" = "latest"
+"winget:Microsoft.VCRedist.2013.x86" = "latest"
+"winget:Microsoft.VCRedist.2015+.x64" = "latest"
+"winget:Microsoft.VCRedist.2015+.x86" = "latest"
+"winget:Nvidia.PhysX" = "latest"
+# apps
+"winget:Amazon.Kindle" = "latest"
+"winget:CometNetwork.BitComet" = "latest"
+"winget:CrystalDewWorld.CrystalDiskInfo" = "latest"
+"winget:Google.Chrome" = "latest"
+"winget:Google.ChromeRemoteDesktopHost" = "latest"
+"winget:Google.GoogleDrive" = "latest"
+"winget:Maxon.CinebenchR23" = "latest"
+"winget:Microsoft.Edge" = "latest"
+"winget:Microsoft.OneDrive" = "latest"
+"winget:Microsoft.Teams" = "latest"
+"winget:mpv.net" = "latest"
+"winget:OBSProject.OBSStudio" = "latest"
+"winget:Piriform.Speccy" = "latest"
+"winget:PPSSPPTeam.PPSSPP" = "latest"
+"winget:QNAP.QfinderPro" = "latest"
+"winget:Valve.Steam" = "latest"
+"winget:yt-dlp.FFmpeg" = "latest"
+"winget:yt-dlp.yt-dlp" = "latest"
+# Microsoft Store (msstore source)
+"winget:XPDM1ZW6815MQM" = "latest" # VLC
+
+[tasks.bootstrap]
+description = "Run imperative setup steps after the declarative bootstrap"
+depends = ["host:check"]
+run = [{ task = "setup:pwsh" }, { task = "setup:nano" }]
+
+[task_config]
+includes = ["tasks"]

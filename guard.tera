@@ -1,18 +1,21 @@
 {#- mise-bootstrap guard, rendered by [bootstrap.files] and [dotfiles] in config.toml.
     Renders empty when the env selection is one of the allowed lists AND is meant for this
     host; otherwise throw() stops mise before it changes anything.
-    The host tests mirror tasks/host/check and bootstrap.sh (ci/check.sh compares them). -#}
+    The host tests mirror tasks/host/check(.ps1), bootstrap.sh and bootstrap.ps1 (ci/check.sh
+    compares them). On Windows only the [dotfiles] copy runs it ([bootstrap.files] is Unix-only). -#}
 {%- if mise_env is defined -%}{%- set sel = mise_env | join(sep=",") -%}{%- else -%}{%- set sel = "" -%}{%- endif -%}
 {%- if sel == "macos" -%}{%- set want = "macos" -%}
 {%- elif sel == "termux" -%}{%- set want = "termux" -%}
 {%- elif sel == "linux,ubuntu" or sel == "linux,ubuntu,desktop" -%}{%- set want = "ubuntu" -%}
 {%- elif sel == "linux,nanopi" -%}{%- set want = "nanopi" -%}
+{%- elif sel == "windows" -%}{%- set want = "windows" -%}
 {%- else -%}
-{{ throw(message="mise-bootstrap guard: env selection [" ~ sel ~ "] is not one of: macos | termux | linux,ubuntu | linux,ubuntu,desktop | linux,nanopi. Fix env in ~/.config/mise/miserc.local.toml; never pass -E or MISE_ENV.") }}
+{{ throw(message="mise-bootstrap guard: env selection [" ~ sel ~ "] is not one of: macos | termux | linux,ubuntu | linux,ubuntu,desktop | linux,nanopi | windows. Fix env in ~/.config/mise/miserc.local.toml; never pass -E or MISE_ENV.") }}
 {%- endif -%}
 {#- host check: ci/check.sh previews delete from this line to the end -#}
 {%- if env.TERMUX_VERSION is defined or "/data/data/com.termux/files/usr/bin/pkg" is file -%}{%- set host = "termux" -%}
 {%- elif os() == "macos" -%}{%- set host = "macos" -%}
+{%- elif os() == "windows" -%}{%- set host = "windows" -%}
 {%- elif os() == "linux" -%}
   {%- if exec(command="grep -aqsi nanopi /proc/device-tree/model && echo nanopi || echo no") | trim == "nanopi" -%}{%- set host = "nanopi" -%}
   {%- elif exec(command='(. /etc/os-release && echo "$ID") 2>/dev/null || true') | trim == "ubuntu" -%}{%- set host = "ubuntu" -%}

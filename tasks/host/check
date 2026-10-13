@@ -4,13 +4,16 @@
 # Runs before every platform's bootstrap task and before the destructive NanoPi tasks
 # (#MISE depends=["host:check"]), so `mise bootstrap --only task`, `mise run bootstrap` and
 # `mise run hdd:init` cannot run on the wrong host. `--detect` prints this host's platform.
-# The host tests mirror guard.tera and bootstrap.sh (ci/check.sh compares them).
+# On Windows mise runs tasks/host/check.ps1 as host:check instead of this script.
+# The host tests mirror guard.tera, bootstrap.sh and the .ps1 twins (ci/check.sh compares them).
 set -euo pipefail
 # shellcheck disable=SC1091 # /etc/os-release
 if [[ -n "${TERMUX_VERSION:-}" || -x /data/data/com.termux/files/usr/bin/pkg ]]; then
   host=termux
 elif [[ "$(uname -s)" == Darwin ]]; then
   host=macos
+elif [[ "${OS:-}" == Windows_NT ]]; then
+  host=windows
 elif grep -aqsi nanopi /proc/device-tree/model; then
   host=nanopi
 elif [[ "$(. /etc/os-release 2>/dev/null && echo "$ID")" == ubuntu ]]; then
@@ -28,8 +31,9 @@ case "$sel" in
   termux) want=termux ;;
   linux,ubuntu | linux,ubuntu,desktop) want=ubuntu ;;
   linux,nanopi) want=nanopi ;;
+  windows) want=windows ;;
   *)
-    echo "host:check: env selection [$sel] is not one of: macos | termux | linux,ubuntu | linux,ubuntu,desktop | linux,nanopi" >&2
+    echo "host:check: env selection [$sel] is not one of: macos | termux | linux,ubuntu | linux,ubuntu,desktop | linux,nanopi | windows" >&2
     exit 1
     ;;
 esac

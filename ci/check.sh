@@ -11,7 +11,7 @@ fail() {
   echo "FAIL: $*" >&2
   status=1
 }
-selections=("macos" "termux" "linux,ubuntu" "linux,ubuntu,desktop" "linux,nanopi")
+selections=("macos" "termux" "linux,ubuntu" "linux,ubuntu,desktop" "linux,nanopi" "windows")
 platform_of() { # <selection> -> the host it is meant for
   case "$1" in
     linux,ubuntu | linux,ubuntu,desktop) echo ubuntu ;;
@@ -55,6 +55,7 @@ check_only() { # <pattern> <allowed module folders...>
 check_only '^"brew(-cask)?:|^"mas:' macos
 check_only '^"apt:' linux ubuntu desktop nanopi
 check_only '^"pkg:' termux
+check_only '^"winget:' windows
 if compgen -G 'shared/*.toml' >/dev/null; then
   while read -r f; do fail "shared/ may only hold [tools]: $f"; done < <(grep -HE '^\[' shared/*.toml | grep -v ':\[tools\]$' || true)
 fi
@@ -79,18 +80,25 @@ for sel in "${selections[@]}"; do
 done
 
 # 5. Runtime data and machine pins stay ignored; scripts and tasks stay executable and lint clean.
+#    PowerShell scripts stay non-executable: an executable tasks/host/check.ps1 would be a second
+#    host:check task on Linux and macOS (mise picks the .ps1 of a pair only on Windows).
 for p in /compose/scanned/ /compose/epgstation/data/ /compose/epgstation/thumbnail/ /compose/epgstation/logs/ \
   miserc.local.toml '*.local.toml'; do
   grep -qxF "$p" .gitignore || fail ".gitignore lacks $p"
 done
 scripts=()
 while read -r f; do
+  if [[ "$f" == *.ps1 ]]; then
+    [[ ! -x "$f" ]] || fail "$f is executable; PowerShell scripts must not be (chmod -x)"
+    continue
+  fi
   [[ -x "$f" ]] || fail "$f is not executable"
   scripts+=("$f")
 done < <({
+  echo bootstrap.ps1
   echo bootstrap.sh
   echo ci/check.sh
-  find tasks shared/tasks conf.d/*/tasks conf.d/*/scripts -type f 2>/dev/null
+  find tasks shared/tasks conf.d/*/tasks conf.d/*/scripts conf.d/*/bin conf.d/*/pwsh -type f 2>/dev/null
 } | sort)
 if command -v shellcheck >/dev/null; then
   shellcheck "${scripts[@]}" || fail "shellcheck"
@@ -99,17 +107,28 @@ else
 fi
 
 # 6. guard.tera, tasks/host/check and bootstrap.sh detect hosts with the same tests, and every
-#    allowed list is known to the guard and to tasks/host/check.
+#    allowed list is known to the guard and to tasks/host/check; on Windows, tasks/host/check.ps1
+#    and bootstrap.ps1 take their place, and the guard runs only from [dotfiles].
 for marker in 'grep -aqsi nanopi /proc/device-tree/model' '/data/data/com.termux/files/usr/bin/pkg' \
   'TERMUX_VERSION' '/etc/os-release'; do
   grep -qF "$marker" guard.tera || fail "guard.tera lacks the host test '$marker'"
   grep -qF "$marker" tasks/host/check || fail "tasks/host/check lacks the host test '$marker'"
   grep -qF "$marker" bootstrap.sh || fail "bootstrap.sh lacks the host test '$marker'"
 done
+grep -qF 'os() == "windows"' guard.tera || fail "guard.tera lacks the Windows host test"
+for f in tasks/host/check tasks/host/check.ps1 bootstrap.ps1; do
+  grep -qF 'Windows_NT' "$f" || fail "$f lacks the Windows host test 'Windows_NT'"
+done
+grep -qF "= '[\"windows\"]'" bootstrap.ps1 || fail "bootstrap.ps1 does not pin env = [\"windows\"]"
 grep -q '^{#- host check' guard.tera || fail "guard.tera lacks the '{#- host check' line that previews cut at"
+if ! grep -qE '^\[dotfiles\."~/\.local/state/mise-bootstrap/dotfiles-guard"\]' config.toml ||
+  ! grep -qx 'os = "unix"' config.toml; then
+  fail "config.toml must keep the [dotfiles] guard and limit the [bootstrap.files] guard to unix"
+fi
 for sel in "${selections[@]}"; do
   grep -qF "\"$sel\"" guard.tera || fail "guard.tera does not allow [$sel]"
   grep -qF "$sel" tasks/host/check || fail "tasks/host/check does not allow [$sel]"
+  grep -qF "'$sel'" tasks/host/check.ps1 || fail "tasks/host/check.ps1 does not allow [$sel]"
 done
 
 # 7. mise, in a throwaway HOME: every selection loads exactly its modules, has a platform
@@ -157,7 +176,7 @@ post="$(sed -n 's/^depends_post = \[\(.*\)\]$/\1/p' "$repo/conf.d/desktop/mise.d
 grep -qF "Depends post: $post" <<<"$(mise -E linux,ubuntu,desktop tasks info bootstrap 2>/dev/null)" ||
   fail "desktop does not append [$post] to the bootstrap task"
 for bad in "" desktop ubuntu nanopi linux linux,desktop,ubuntu desktop,linux,ubuntu ubuntu,linux macos,nanopi \
-  linux,ubunut termux,macos; do
+  linux,ubunut termux,macos linux,windows windows,desktop; do
   out="$(MISE_ENV="$bad" mise bootstrap files status 2>&1 || true)"
   grep -q 'mise-bootstrap guard: env selection' <<<"$out" || fail "guard accepted [$bad]"
 done

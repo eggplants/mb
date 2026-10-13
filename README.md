@@ -10,6 +10,7 @@
 | Ubuntu Desktop | `["linux", "ubuntu", "desktop"]` |
 | Ubuntu Server | `["linux", "ubuntu"]` |
 | NanoPi R6S | `["linux", "nanopi"]` |
+| Windows | `["windows"]` |
 
 ## Update
 
@@ -57,6 +58,14 @@ It installs mise and clones this repo to `~/.config/mise`. After restarted:
 ```bash
 # Place your GPG secret key at ~/.sec.key, then:
 bash ~/.config/mise/bootstrap.sh
+```
+
+### Windows
+
+In PowerShell, as yourself (not as Administrator):
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/eggplants/mise-bootstrap/main/bootstrap.ps1)))
 ```
 
 ### NanoPi R6S
@@ -109,4 +118,4 @@ rm -rf ~/.config/mise/compose/scanned && mb    # scan the channels again
   - [~eggplants/setup-termux.sh~](https://github.com/eggplants/setup-termux.sh)
   - [~eggplants/setup-macos.zsh~](https://github.com/eggplants/setup-macos.zsh)
   - [~eggplants/setup-nanopi~](https://github.com/eggplants/setup-nanopi)
-- [eggplants/SetupWindows.ps1](https://github.com/eggplants/SetupWindows.ps1)
+  - [~eggplants/SetupWindows.ps1~](https://github.com/eggplants/SetupWindows.ps1)
