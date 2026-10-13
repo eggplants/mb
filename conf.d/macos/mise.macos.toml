@@ -1,4 +1,3 @@
-# ruby, node, go, rust, uv, claude, gh, jq, pinact, yt-dlp and two pipx tools
 include = ["../../shared/workstation-tools.toml"]
 
 [settings]
@@ -18,11 +17,9 @@ aws-cli = "latest"
 cloc = "latest"
 cmake = "latest"
 colima = "latest"
-lazydocker = "latest"
 lima = "latest"
 mas = "latest"
 mkcert = "latest"
-pre-commit = "latest"
 protoc = "latest"
 ripgrep = "latest"
 shellcheck = "latest"
@@ -31,17 +28,8 @@ sops = "latest"
 yq = "latest"
 "aqua:k1LoW/mo" = "latest"
 "aqua:sibprogrammer/xq" = "latest"
-"aqua:veeso/termscp" = "latest"
-"npm:difit" = "latest"
-"pipx:afxdl" = "latest"
 "pipx:claude-monitor" = "latest"
-"pipx:gppt" = "latest"
 "pipx:gw2aws" = "0.0.3"
-"pipx:migrate-to-uv" = "latest"
-"pipx:onelogin-aws-assume-role" = "latest"
-"pipx:poetry" = "latest"
-"pipx:saizeriya" = "latest"
-"pipx:wiredify" = "latest"
 
 # Casks installed by Homebrew count as installed; take over identical apps.
 [bootstrap.brew]
