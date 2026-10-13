@@ -105,4 +105,8 @@ rm -rf ~/.config/mise/compose/scanned && mb    # scan the channels again
 ## Family
 
 - [eggplants/mise-bootstrap](https://github.com/eggplants/mise-bootstrap) <- here
+  - [~eggplants/setup-ubuntu.sh~](https://github.com/eggplants/setup-ubuntu.sh)
+  - [~eggplants/setup-termux.sh~](https://github.com/eggplants/setup-termux.sh)
+  - [~eggplants/setup-macos.zsh~](https://github.com/eggplants/setup-macos.zsh)
+  - [~eggplants/setup-nanopi~](https://github.com/eggplants/setup-nanopi)
 - [eggplants/SetupWindows.ps1](https://github.com/eggplants/SetupWindows.ps1)
