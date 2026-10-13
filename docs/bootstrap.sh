@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # First-time setup of a machine from eggplants/mb. Later runs: mb (or mise bootstrap).
 #
-#   bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mb/main/docs/bootstrap.sh) [mise bootstrap args]
+#   bash <(curl -fsSL https://egpl.dev/mb/bootstrap.sh) [mise bootstrap args]
 #
 # Installs git and mise when missing, clones this repo to ~/.config/mise (unless it is already
 # there, as after Ubuntu's autoinstall.yaml), pins this machine's env list in miserc.local.toml

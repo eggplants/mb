@@ -24,7 +24,7 @@ mb
 
 ```zsh
 # Place your GPG secret key at ~/.sec.key, then:
-bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mb/main/docs/bootstrap.sh)
+bash <(curl -fsSL https://egpl.dev/mb/bootstrap.sh)
 
 # Run again to install `mas` packages
 mb
@@ -45,7 +45,7 @@ termux-setup-storage
 mv ~/storage/downloads/sec ~/.sec.key
 
 # Setup
-bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mb/main/docs/bootstrap.sh)
+bash <(curl -fsSL https://egpl.dev/mb/bootstrap.sh)
 ```
 
 ### Ubuntu
@@ -65,7 +65,7 @@ bash ~/.config/mise/docs/bootstrap.sh
 In PowerShell, as yourself (not as Administrator):
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/eggplants/mb/main/docs/bootstrap.ps1)))
+& ([scriptblock]::Create((irm https://egpl.dev/mb/bootstrap.ps1)))
 ```
 
 ### NanoPi R6S
@@ -87,7 +87,7 @@ sudo passwd eggplants
 Log in as `eggplants`, then:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mb/main/docs/bootstrap.sh)
+bash <(curl -fsSL https://egpl.dev/mb/bootstrap.sh)
 sudo reboot
 
 mb

@@ -2,7 +2,7 @@
 # Later runs: mb (pwsh/profile.ps1). Run it as yourself, not as Administrator: installers raise
 # their own UAC prompts. It works in Windows PowerShell 5.1 and in PowerShell 7:
 #
-#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/eggplants/mb/main/docs/bootstrap.ps1))) [mise bootstrap args]
+#   & ([scriptblock]::Create((irm https://egpl.dev/mb/bootstrap.ps1))) [mise bootstrap args]
 #
 # Installs Git, mise and PowerShell 7 with WinGet when missing, clones this repo to
 # ~/.config/mise (unless it is already there), pins env = ["windows"] in miserc.local.toml
