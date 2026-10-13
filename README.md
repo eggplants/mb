@@ -1,7 +1,7 @@
-# mise-bootstrap
+# `mb`: My `mise bootstrap` Configurations for Several Environments
 
-[![Check config](https://github.com/eggplants/mise-bootstrap/actions/workflows/check.yml/badge.svg)](https://github.com/eggplants/mise-bootstrap/actions/workflows/check.yml)
-[![Validate autoinstall.yaml](https://github.com/eggplants/mise-bootstrap/actions/workflows/validate-autoinstall.yml/badge.svg)](https://github.com/eggplants/mise-bootstrap/actions/workflows/validate-autoinstall.yml)
+[![Check config](https://github.com/eggplants/mb/actions/workflows/check.yml/badge.svg)](https://github.com/eggplants/mb/actions/workflows/check.yml)
+[![Validate autoinstall.yaml](https://github.com/eggplants/mb/actions/workflows/validate-autoinstall.yml/badge.svg)](https://github.com/eggplants/mb/actions/workflows/validate-autoinstall.yml)
 
 | Machine | `env` in `miserc.local.toml` |
 |---|---|
@@ -24,7 +24,7 @@ mb
 
 ```zsh
 # Place your GPG secret key at ~/.sec.key, then:
-bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mise-bootstrap/main/bootstrap.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mb/main/docs/bootstrap.sh)
 
 # Run again to install `mas` packages
 mb
@@ -45,19 +45,19 @@ termux-setup-storage
 mv ~/storage/downloads/sec ~/.sec.key
 
 # Setup
-bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mise-bootstrap/main/bootstrap.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mb/main/docs/bootstrap.sh)
 ```
 
 ### Ubuntu
 
 Install [Ubuntu Desktop](https://ubuntu.com/download/desktop) with [`autoinstall.yaml`](./docs/autoinstall.yaml)
-- <https://egpl.dev/mise-bootstrap/autoinstall.yaml>
+- <https://egpl.dev/mb/autoinstall.yaml>
 
 It installs mise and clones this repo to `~/.config/mise`. After restarted:
 
 ```bash
 # Place your GPG secret key at ~/.sec.key, then:
-bash ~/.config/mise/bootstrap.sh
+bash ~/.config/mise/docs/bootstrap.sh
 ```
 
 ### Windows
@@ -65,7 +65,7 @@ bash ~/.config/mise/bootstrap.sh
 In PowerShell, as yourself (not as Administrator):
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/eggplants/mise-bootstrap/main/bootstrap.ps1)))
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/eggplants/mb/main/docs/bootstrap.ps1)))
 ```
 
 ### NanoPi R6S
@@ -87,7 +87,7 @@ sudo passwd eggplants
 Log in as `eggplants`, then:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mise-bootstrap/main/bootstrap.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mb/main/docs/bootstrap.sh)
 sudo reboot
 
 mb
@@ -113,7 +113,7 @@ rm -rf ~/.config/mise/compose/scanned && mb    # scan the channels again
 
 ## Family
 
-- [eggplants/mise-bootstrap](https://github.com/eggplants/mise-bootstrap) <- here
+- [eggplants/mb](https://github.com/eggplants/mb) <- here
   - [~eggplants/setup-ubuntu.sh~](https://github.com/eggplants/setup-ubuntu.sh)
   - [~eggplants/setup-termux.sh~](https://github.com/eggplants/setup-termux.sh)
   - [~eggplants/setup-macos.zsh~](https://github.com/eggplants/setup-macos.zsh)

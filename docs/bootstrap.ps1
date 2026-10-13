@@ -1,8 +1,8 @@
-# First-time setup of a Windows machine from eggplants/mise-bootstrap; the twin of bootstrap.sh.
+# First-time setup of a Windows machine from eggplants/mb; the twin of bootstrap.sh.
 # Later runs: mb (pwsh/profile.ps1). Run it as yourself, not as Administrator: installers raise
 # their own UAC prompts. It works in Windows PowerShell 5.1 and in PowerShell 7:
 #
-#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/eggplants/mise-bootstrap/main/bootstrap.ps1))) [mise bootstrap args]
+#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/eggplants/mb/main/docs/bootstrap.ps1))) [mise bootstrap args]
 #
 # Installs Git, mise and PowerShell 7 with WinGet when missing, clones this repo to
 # ~/.config/mise (unless it is already there), pins env = ["windows"] in miserc.local.toml
@@ -10,7 +10,7 @@
 # The host tests mirror tasks/host/check(.ps1), guard.tera and bootstrap.sh (ci/check.sh compares them).
 $ErrorActionPreference = 'Stop'
 
-$repo = 'https://github.com/eggplants/mise-bootstrap.git'
+$repo = 'https://github.com/eggplants/mb.git'
 $configDir = Join-Path $HOME '.config\mise'
 # throw, not exit: run as a script block, exit would close the calling shell
 function Die([string]$msg) { throw "bootstrap.ps1: $msg" }
@@ -42,7 +42,7 @@ Update-SessionPath
 if (-not (Test-Path $configDir)) {
   git clone $repo $configDir
   if ($LASTEXITCODE) { Die "git clone $repo failed" }
-} elseif ((git -C $configDir config --get remote.origin.url) -notlike '*eggplants/mise-bootstrap*') {
+} elseif ((git -C $configDir config --get remote.origin.url) -notmatch 'eggplants/(mb|mise-bootstrap)(\.git)?/?$') {
   Die "$configDir exists and is not a checkout of $repo; move it away first"
 }
 $miserc = Join-Path $configDir 'miserc.local.toml'

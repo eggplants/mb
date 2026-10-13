@@ -46,11 +46,11 @@ autoinstall:
 
 
   shutdown: reboot
-  # After the first login, run: ~/.config/mise/bootstrap.sh
+  # After the first login, run: ~/.config/mise/docs/bootstrap.sh
   late-commands:
     - curtin in-target -- apt-get update -y
     - curtin in-target -- apt-get install -y ca-certificates curl git
     - curtin in-target -- su - eggplants -c 'curl -fsSL https://mise.run | sh'
-    - curtin in-target -- su - eggplants -c 'git clone https://github.com/eggplants/mise-bootstrap ~/.config/mise'
+    - curtin in-target -- su - eggplants -c 'git clone https://github.com/eggplants/mb ~/.config/mise'
     - curtin in-target -- apt-get autoremove -y
     - curtin in-target -- apt-get autoclean -y

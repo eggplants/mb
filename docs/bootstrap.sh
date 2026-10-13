@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# First-time setup of a machine from eggplants/mise-bootstrap. Later runs: mb (or mise bootstrap).
+# First-time setup of a machine from eggplants/mb. Later runs: mb (or mise bootstrap).
 #
-#   bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mise-bootstrap/main/bootstrap.sh) [mise bootstrap args]
+#   bash <(curl -fsSL https://raw.githubusercontent.com/eggplants/mb/main/docs/bootstrap.sh) [mise bootstrap args]
 #
 # Installs git and mise when missing, clones this repo to ~/.config/mise (unless it is already
 # there, as after Ubuntu's autoinstall.yaml), pins this machine's env list in miserc.local.toml
@@ -10,7 +10,7 @@
 # The host tests mirror tasks/host/check and guard.tera (ci/check.sh compares them).
 set -euo pipefail
 
-repo=https://github.com/eggplants/mise-bootstrap.git
+repo=https://github.com/eggplants/mb.git
 config_dir="$HOME/.config/mise"
 export PATH="$HOME/.local/bin:$PATH"
 die() {
@@ -63,7 +63,7 @@ esac
 
 if [[ ! -e "$config_dir" ]]; then
   git clone "$repo" "$config_dir"
-elif [[ "$(git -C "$config_dir" remote get-url origin 2>/dev/null)" != *eggplants/mise-bootstrap* ]]; then
+elif ! [[ "$(git -C "$config_dir" remote get-url origin 2>/dev/null)" =~ eggplants/(mb|mise-bootstrap)(\.git)?/?$ ]]; then
   die "$config_dir exists and is not a checkout of $repo; move it away first"
 fi
 [[ -f "$config_dir/miserc.local.toml" ]] || echo "env = $env" >"$config_dir/miserc.local.toml"

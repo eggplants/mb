@@ -53,8 +53,8 @@ On Windows, `mb` is the PowerShell function in `conf.d/windows/pwsh/profile.ps1`
 | `config.toml` | Every machine. It holds: `min_version`; the guard entries; `[bootstrap.repos]` for the zsh plugins and nano syntax; the shared `[dotfiles]`; shell activation; and a fallback `bootstrap` task that fails. The shared dotfiles are zshrc, zshenv and nanorc, plus gitconfig through `variants` on macOS, Termux and Ubuntu. |
 | `guard.tera` | Renders empty when the env list is one of the six and matches this host; otherwise `throw()` stops mise before it changes anything |
 | `miserc.toml` | `auto_env = false` |
-| `bootstrap.sh` | First run only: detects the platform, installs git and mise, clones the repo (unless present), pins `miserc.local.toml` (unless present), runs the platform pre-steps (Termux: link the `pkg` plugin; NanoPi: `hdd:init`), then `exec mise bootstrap` (with `--update` on Ubuntu and the NanoPi). Extra arguments go to `mise bootstrap`. |
-| `bootstrap.ps1` | The same for Windows: installs Git, mise and PowerShell 7 with WinGet, checks mise against `min_version`, clones, pins `env = ["windows"]`, then `mise bootstrap` |
+| `docs/bootstrap.sh` | First run only (fetched from `raw.githubusercontent.com/eggplants/mb/main/docs/`): detects the platform, installs git and mise, clones the repo (unless present), pins `miserc.local.toml` (unless present), runs the platform pre-steps (Termux: link the `pkg` plugin; NanoPi: `hdd:init`), then `exec mise bootstrap` (with `--update` on Ubuntu and the NanoPi). Extra arguments go to `mise bootstrap`. |
+| `docs/bootstrap.ps1` | The same for Windows: installs Git, mise and PowerShell 7 with WinGet, checks mise against `min_version`, clones, pins `env = ["windows"]`, then `mise bootstrap` |
 | `tasks/host/check` | `host:check` (hidden): fails unless `MISE_ENV` is a valid list that matches this host. `bash tasks/host/check --detect` prints the host's platform. |
 | `tasks/host/check.ps1` | The Windows twin of `tasks/host/check`: mise runs it as `host:check` there. It must stay non-executable, or Linux and macOS list it as a second task. |
 | `.gitattributes` | LF checkouts, also from Git for Windows |
@@ -72,7 +72,7 @@ On Windows, `mb` is the PowerShell function in `conf.d/windows/pwsh/profile.ps1`
 | `conf.d/nanopi/` | apt sources (Debian mirror, Tailscale, Grafana); system files; services; `[bootstrap.compose.tv]`; the `install-debs.sh` hook; `authorized_keys`; `setup:system`, `setup:docker`, `setup:konomitv`, `hdd:init`, `tv:playlist` |
 | `compose/` | NanoPi Compose project `tv`: mirakc, MariaDB, EPGStation, edcb-bridge. `scanned/` and EPGStation's `data/`, `thumbnail/` and `logs/` are generated and gitignored. |
 | `plugins/pkg/` | Package manager plugin that adds the `pkg:` manager for Termux (`pkg` / `dpkg-query`) |
-| `docs/autoinstall.yaml` | Ubuntu unattended-install seed file, served via GitHub Pages at <https://egpl.dev/mise-bootstrap/autoinstall.yaml> |
+| `docs/autoinstall.yaml` | Ubuntu unattended-install seed file, served via GitHub Pages at <https://egpl.dev/mb/autoinstall.yaml> |
 | `ci/check.sh` | Read-only lint, guard and preview checks; run by `.github/workflows/check.yml` |
 | `.github/workflows/validate-autoinstall.yml` | Validates `docs/autoinstall.yaml` when it changes |
 
@@ -149,7 +149,7 @@ On Windows, `mb` is the PowerShell function in `conf.d/windows/pwsh/profile.ps1`
   - The task answers both installer questions with `n` (keep `$PREFIX/etc` configs, no extra packages) and skips once `~/.local/share/claude/.installer-rev` matches the pinned commit.
   - Its wrapper points Claude Code's own DNS at 8.8.8.8 / 8.8.4.4. Run it from a plain Termux shell, not inside a claude session.
   - `setup:claude` (the claude-statusbar statusLine, shared with macOS and Ubuntu) runs after it, so `~/.claude/settings.json` gets both keys.
-- **Task shebangs.** Termux has no `/usr/bin/env` unless termux-exec is active. With `use_file_shell_for_executable_tasks = true`, mise starts a file task as `<interpreter> <file>`, taking the interpreter from the shebang with `/usr/bin/env` stripped. So every task, shared ones included, uses `#!/usr/bin/env bash`. Scripts run outside mise are started with `bash <script>` (for example `bash ~/.config/mise/bootstrap.sh`).
+- **Task shebangs.** Termux has no `/usr/bin/env` unless termux-exec is active. With `use_file_shell_for_executable_tasks = true`, mise starts a file task as `<interpreter> <file>`, taking the interpreter from the shebang with `/usr/bin/env` stripped. So every task, shared ones included, uses `#!/usr/bin/env bash`. Scripts run outside mise are started with `bash <script>` (for example `bash ~/.config/mise/docs/bootstrap.sh`).
 
 #### Ubuntu
 
@@ -217,7 +217,7 @@ On Windows, `mb` is the PowerShell function in `conf.d/windows/pwsh/profile.ps1`
 - **No `# MISE` comments in task files.** A comment line that starts with `# MISE` is parsed as a `#MISE` header.
 - **A new platform module needs `write_targets`,** or `mise use -g` writes into `config.toml`.
 - **`mise dot add` saves the file under `~/.dotfiles`** (mise's `dotfiles.root`), even though the entry goes into the module. Pass `--source ~/.config/mise/conf.d/<platform>/dotfiles/<name>` to keep the file in this repo.
-- **Keep the guard copies in sync.** The allowed lists appear in `guard.tera`, `tasks/host/check`, `tasks/host/check.ps1`, `bootstrap.sh`, `bootstrap.ps1` and `ci/check.sh`. The host tests are in `tasks/host/check` and `bootstrap.sh` (shell), the `.ps1` twins (PowerShell, Windows only) and `guard.tera` (Tera); `ci/check.sh` checks them for the same markers.
+- **Keep the guard copies in sync.** The allowed lists appear in `guard.tera`, `tasks/host/check`, `tasks/host/check.ps1`, `docs/bootstrap.sh`, `docs/bootstrap.ps1` and `ci/check.sh`. The host tests are in `tasks/host/check` and `docs/bootstrap.sh` (shell), the `.ps1` twins (PowerShell, Windows only) and `guard.tera` (Tera); `ci/check.sh` checks them for the same markers.
   - A new destructive task gets `#MISE depends=["host:check"]`.
   - The guard covers only runs that include files, dotfiles or the `bootstrap` task. An explicit wrong `-E` with any other `--only` selection (packages, services, compose, tools, repos, user, linux-systemd-units, mise-shell-activate, …) runs unchecked.
   - The dotfile copy of the guard writes an empty `~/.local/state/mise-bootstrap/dotfiles-guard`, which shows up in `mise dot status`.
@@ -248,15 +248,15 @@ docker exec termux chown -R 1000:1000 /data/data/com.termux/files/home/.config
 docker exec -it termux /entrypoint.sh bash -lc '
   pkg upgrade -y && pkg install -y mise git rust &&
   cd ~/.config/mise && rm -f miserc.local.toml &&
-  { git remote get-url origin || git remote add origin https://github.com/eggplants/mise-bootstrap.git; } &&
-  cd ~ && mise trust -a && bash ~/.config/mise/bootstrap.sh'
+  { git remote get-url origin || git remote add origin https://github.com/eggplants/mb.git; } &&
+  cd ~ && mise trust -a && bash ~/.config/mise/docs/bootstrap.sh'
 docker rm -f termux
 ```
 
 - Run commands through `/entrypoint.sh`, so they run as the Termux user; `pkg` refuses to run as root.
 - `docker cp` needs the parent directory, and a fresh container has no `~/.config`.
 - `rm -f miserc.local.toml` drops this host's pin, which `docker cp` copied in. `bootstrap.sh` then detects Termux (via `.../usr/bin/pkg`) and pins `env = ["termux"]`.
-- `bootstrap.sh` refuses a `~/.config/mise` whose `origin` is not this repo.
+- `bootstrap.sh` refuses a `~/.config/mise` whose `origin` is not this repo (`eggplants/mb`, or its old name `eggplants/mise-bootstrap`).
 - The container has no termux-exec (`LD_PRELOAD` is empty), so a `#!/usr/bin/env` script cannot be started directly there. Start scripts with `bash <script>`. File tasks still work, through `use_file_shell_for_executable_tasks`.
 - The container has no Android framework, so `getprop` and `termux-setup-storage` fail there.
-- For a quick check, end with `bash ~/.config/mise/bootstrap.sh --dry-run`.
+- For a quick check, end with `bash ~/.config/mise/docs/bootstrap.sh --dry-run`.

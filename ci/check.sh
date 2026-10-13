@@ -95,8 +95,8 @@ while read -r f; do
   [[ -x "$f" ]] || fail "$f is not executable"
   scripts+=("$f")
 done < <({
-  echo bootstrap.ps1
-  echo bootstrap.sh
+  echo docs/bootstrap.ps1
+  echo docs/bootstrap.sh
   echo ci/check.sh
   find tasks shared/tasks conf.d/*/tasks conf.d/*/scripts conf.d/*/bin conf.d/*/pwsh -type f 2>/dev/null
 } | sort)
@@ -113,13 +113,13 @@ for marker in 'grep -aqsi nanopi /proc/device-tree/model' '/data/data/com.termux
   'TERMUX_VERSION' '/etc/os-release'; do
   grep -qF "$marker" guard.tera || fail "guard.tera lacks the host test '$marker'"
   grep -qF "$marker" tasks/host/check || fail "tasks/host/check lacks the host test '$marker'"
-  grep -qF "$marker" bootstrap.sh || fail "bootstrap.sh lacks the host test '$marker'"
+  grep -qF "$marker" docs/bootstrap.sh || fail "docs/bootstrap.sh lacks the host test '$marker'"
 done
 grep -qF 'os() == "windows"' guard.tera || fail "guard.tera lacks the Windows host test"
-for f in tasks/host/check tasks/host/check.ps1 bootstrap.ps1; do
+for f in tasks/host/check tasks/host/check.ps1 docs/bootstrap.ps1; do
   grep -qF 'Windows_NT' "$f" || fail "$f lacks the Windows host test 'Windows_NT'"
 done
-grep -qF "= '[\"windows\"]'" bootstrap.ps1 || fail "bootstrap.ps1 does not pin env = [\"windows\"]"
+grep -qF "= '[\"windows\"]'" docs/bootstrap.ps1 || fail "docs/bootstrap.ps1 does not pin env = [\"windows\"]"
 grep -q '^{#- host check' guard.tera || fail "guard.tera lacks the '{#- host check' line that previews cut at"
 if ! grep -qE '^\[dotfiles\."~/\.local/state/mise-bootstrap/dotfiles-guard"\]' config.toml ||
   ! grep -qx 'os = "unix"' config.toml; then

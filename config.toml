@@ -57,5 +57,5 @@ bash = true
 # when no platform module is loaded.
 [tasks.bootstrap]
 description = "No platform selected"
-run = "echo 'mise-bootstrap: no platform env selected; run: bash ~/.config/mise/bootstrap.sh' >&2; exit 1"
-run_windows = "echo mise-bootstrap: no platform env selected; run: ~/.config/mise/bootstrap.ps1 1>&2 & exit /b 1"
+run = "echo 'mise-bootstrap: no platform env selected; run: bash ~/.config/mise/docs/bootstrap.sh' >&2; exit 1"
+run_windows = "echo mise-bootstrap: no platform env selected; run: ~/.config/mise/docs/bootstrap.ps1 1>&2 & exit /b 1"
