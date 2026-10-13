@@ -41,7 +41,7 @@ services:
       TZ: Asia/Tokyo
       RUST_LOG: info
   mysql:
-    image: mariadb:11.8
+    image: mariadb:11.8@sha256:6422478cb8e159f080fb1d8ccf65101e26fe51385787fde7d16c3b165a331f15
     container_name: mysql
     ports:
       - 3306:3306
@@ -93,7 +93,7 @@ services:
     restart: always
   edcb-bridge:
     # https://github.com/eggplants/edcb-bridge/pkgs/container/edcb-bridge
-    image: ghcr.io/eggplants/edcb-bridge:0.0
+    image: ghcr.io/eggplants/edcb-bridge:0.0@sha256:0fa92c68fb0eb05c5c8d9ec851cd779d18160611b5aca0e288eb1d404b68b4f3
     container_name: edcb-bridge
     restart: unless-stopped
     ports:
