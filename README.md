@@ -1,4 +1,4 @@
-# `mb`: My `mise bootstrap` Configurations for Several Environments
+# `mb`: My `mise bootstrap` Configurations
 
 [![Check config](https://github.com/eggplants/mb/actions/workflows/check.yml/badge.svg)](https://github.com/eggplants/mb/actions/workflows/check.yml)
 [![Validate autoinstall.yaml](https://github.com/eggplants/mb/actions/workflows/validate-autoinstall.yml/badge.svg)](https://github.com/eggplants/mb/actions/workflows/validate-autoinstall.yml)
