@@ -61,7 +61,6 @@ services:
         max-size: "10m"
         max-file: "3"
   epgstation:
-    # A new tag changes the service's config hash, so `mise bootstrap` rebuilds and recreates it
     image: tv-epgstation:v3.0.0-beta2
     pull_policy: build
     build:
