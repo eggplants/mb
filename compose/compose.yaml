@@ -61,9 +61,12 @@ services:
         max-size: "10m"
         max-file: "3"
   epgstation:
+    # A new tag changes the service's config hash, so `mise bootstrap` rebuilds and recreates it
+    image: tv-epgstation:v3.0.0-beta2
+    pull_policy: build
     build:
       dockerfile_inline: |
-        FROM l3tnun/epgstation:master-debian
+        FROM l3tnun/epgstation:v3.0.0-beta2-debian@sha256:df228bf4856c2ac1b1c60109e56b7645734aca473c9f6be0d23e1cf3927fe594
         WORKDIR /tmp
         RUN <<EOF
         set -eux
@@ -93,7 +96,7 @@ services:
     restart: always
   edcb-bridge:
     # https://github.com/eggplants/edcb-bridge/pkgs/container/edcb-bridge
-    image: ghcr.io/eggplants/edcb-bridge:0.0@sha256:0fa92c68fb0eb05c5c8d9ec851cd779d18160611b5aca0e288eb1d404b68b4f3
+    image: ghcr.io/eggplants/edcb-bridge:0.0.1@sha256:1a9bbe7684f249fc132286918a0c74b4546ed3ae136c17a2420edcc60f548128
     container_name: edcb-bridge
     restart: unless-stopped
     ports:
