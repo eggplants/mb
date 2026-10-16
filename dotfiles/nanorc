@@ -1,4 +1,4 @@
-include "~/.local/share/nano-highlight/*.nanorc"
+include "~/.local/share/awesome-nano-syntax-highlighting/files/*.nanorc"
 
 set autoindent
 set constantshow

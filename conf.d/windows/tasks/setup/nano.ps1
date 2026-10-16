@@ -1,6 +1,6 @@
 #MISE description="Install the latest nano-win build as ~/.local/bin/nano.exe"
 # winget's GNU.Nano is stuck at 2.7.5, so take the newest nano-win build from its author.
-# ~/.nanorc (dotfiles/nanorc, shared) includes the syntax files of the nano-highlight repo.
+# ~/.nanorc (dotfiles/nanorc, shared) includes the syntax files of the awesome-nano-syntax-highlighting repo.
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 

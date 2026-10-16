@@ -35,7 +35,7 @@ mode = "template"
 "~/.local/share/zsh/plugins/fast-syntax-highlighting" = { url = "https://github.com/zdharma-continuum/fast-syntax-highlighting" }
 "~/.local/share/zsh/plugins/history-search-multi-word" = { url = "https://github.com/zdharma-continuum/history-search-multi-word" }
 "~/.local/share/zsh/plugins/zsh-history-substring-search" = { url = "https://github.com/zsh-users/zsh-history-substring-search" }
-"~/.local/share/nano-highlight" = { url = "https://github.com/serialhex/nano-highlight" }
+"~/.local/share/awesome-nano-syntax-highlighting" = { url = "https://github.com/eggplants/awesome-nano-syntax-highlighting" }
 
 # Dotfiles shared by every machine; platform-only ones stay in conf.d/<module>/.
 # On Windows the zsh files are inert, and a symlink falls back to a copy without Developer Mode.

@@ -84,7 +84,7 @@ On Windows, `mb` is the PowerShell function in `conf.d/windows/pwsh/profile.ps1`
 - **Declarative first, tasks for the rest.** Use `[bootstrap.*]` and `[dotfiles]` when mise can check the state. Hooks and the `bootstrap` task run on every `mise bootstrap`, so they must be idempotent: guard every step.
 - **`config.toml` holds only what is right on all five platforms.** It has no `[tools]`, packages, hooks, services, compose, login shell, `[settings]` or `/etc` files, and `ci/check.sh` enforces this.
   - `[bootstrap.files]` and `[bootstrap.directories]` fail on Windows, so any entry in `config.toml` needs `os = "unix"`, as the guard has.
-  - On Windows the zsh dotfiles, the zsh plugin repos and the bash/zsh activation are inert; `~/.nanorc` and the nano-highlight repo serve nano-win.
+  - On Windows the zsh dotfiles, the zsh plugin repos and the bash/zsh activation are inert; `~/.nanorc` and the awesome-nano-syntax-highlighting repo serve nano-win.
 - **Fail closed.** These checks stop a wrong or missing selection:
   - `guard.tera`, from `[bootstrap.files]` (not on Windows), and a `[dotfiles]` copy for `--only dotfiles` and `mise dot apply`;
   - `host:check`, which every platform's `bootstrap` task and every destructive task depend on;
