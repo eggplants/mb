@@ -4,6 +4,7 @@
 
 [bootstrap.packages]
 "apt:ca-certificates" = "latest"
+"apt:cifs-utils" = "latest"
 "apt:curl" = "latest"
 "apt:wget" = "latest"
 "apt:git" = "latest"
