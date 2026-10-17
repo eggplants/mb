@@ -1,33 +1,9 @@
-# Base config: loaded on every machine (macOS, Termux, Ubuntu, the NanoPi R6S and Windows).
-# Each platform's setup lives in conf.d/<module>/mise.<module>.toml, which mise loads only for
-# the env list pinned in miserc.local.toml (written by bootstrap.sh, never committed):
-#   macos | termux | linux,ubuntu | linux,ubuntu,desktop | linux,nanopi | windows
-# Keep this file free of anything that is wrong on one of the five: no [tools], packages,
-# hooks, services, compose, login shell or /etc files (ci/check.sh enforces this).
-# `mise use -g`, `mise bootstrap packages use -g` and `mise dot add` write into this machine's
-# module (each platform module sets [settings] write_targets), not here.
-min_version = "2026.10.7"
-
-# Guard: guard.tera throws unless the env selection is exactly one of the lists above and
-# is meant for this host. mise renders [bootstrap.files] templates before its first change,
-# so a bad selection stops `mise bootstrap` (and plan, status, --dry-run) before step 1.
-# With a valid selection it renders empty and remove_empty keeps the target absent.
-# [bootstrap.files] fail on Windows, so there the [dotfiles] copy below is the guard.
 [bootstrap.files."~/.local/state/mise-bootstrap/guard"]
 os = "unix"
 source = "guard.tera"
 template = true
 remove_empty = true
 
-# The same check for `mise bootstrap --only dotfiles` and `mise dot apply`, which skip
-# [bootstrap.files]. Dotfile templates render before the first change of a real run
-# (not in a dry run); this one writes an empty file. On Windows it is the only guard copy.
-[dotfiles."~/.local/state/mise-bootstrap/dotfiles-guard"]
-source = "guard.tera"
-mode = "template"
-
-# zsh plugins (loaded by dotfiles/zshrc) and nano syntax highlighting (dotfiles/nanorc).
-# Windows clones them too (repos take no os selector); nano-win reads the same ~/.nanorc.
 [bootstrap.repos]
 "~/.local/share/zsh/plugins/pure" = { url = "https://github.com/sindresorhus/pure" }
 "~/.local/share/zsh/plugins/zsh-autosuggestions" = { url = "https://github.com/zsh-users/zsh-autosuggestions" }
@@ -37,26 +13,21 @@ mode = "template"
 "~/.local/share/zsh/plugins/zsh-history-substring-search" = { url = "https://github.com/zsh-users/zsh-history-substring-search" }
 "~/.local/share/awesome-nano-syntax-highlighting" = { url = "https://github.com/eggplants/awesome-nano-syntax-highlighting" }
 
-# Dotfiles shared by every machine; platform-only ones stay in conf.d/<module>/.
-# On Windows the zsh files are inert, and a symlink falls back to a copy without Developer Mode.
-[dotfiles]
-"~/.zshenv" = { source = "dotfiles/zshenv" }
-"~/.zshrc" = { source = "dotfiles/zshrc" }
-"~/.nanorc" = { source = "dotfiles/nanorc" }
-# Machines with a GPG key only: with no matching variant (the NanoPi) the entry is skipped.
-"~/.gitconfig" = { source = "dotfiles/gitconfig", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
-# User-scope Claude Code skills, on the machines that install Claude Code.
-"~/.claude/skills/commit/SKILL.md" = { source = "dotfiles/claude/skills/commit/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
-
-# ~/.zshrc is a whole-file dotfile that activates mise itself, so zsh = true only adds the
-# shims to ~/.zprofile (what macOS spelled zprofile = "shims"); bash gets both files (Git Bash
-# reads them on Windows). PowerShell is not supported here: conf.d/windows/pwsh/profile.ps1.
 [bootstrap.mise_shell_activate]
 zsh = true
 bash = true
 
-# Each platform module replaces this task (and runs host:check first); this one only runs
-# when no platform module is loaded.
+[dotfiles]
+"~/.zshenv" = { source = "dotfiles/zshenv" }
+"~/.zshrc" = { source = "dotfiles/zshrc" }
+"~/.nanorc" = { source = "dotfiles/nanorc" }
+"~/.gitconfig" = { source = "dotfiles/gitconfig", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
+"~/.claude/skills/commit/SKILL.md" = { source = "dotfiles/claude/skills/commit/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
+
+[dotfiles."~/.local/state/mise-bootstrap/dotfiles-guard"]
+source = "guard.tera"
+mode = "template"
+
 [tasks.bootstrap]
 description = "No platform selected"
 run = "echo 'mise-bootstrap: no platform env selected; run: bash ~/.config/mise/docs/bootstrap.sh' >&2; exit 1"

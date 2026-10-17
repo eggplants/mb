@@ -27,7 +27,7 @@ source = "files/apt/winehq.asc"
 phase = "pre-packages"
 
 [bootstrap.files."/etc/apt/sources.list.d/winehq.sources"]
-os = "linux" # exec() below must never render on another OS (plan there would fail)
+os = "linux"  # exec() below must never render on another OS (plan there would fail)
 template = true
 phase = "pre-packages"
 content = """
@@ -39,16 +39,16 @@ Architectures: amd64 i386
 Signed-By: /etc/apt/keyrings/winehq.asc
 """
 
+[bootstrap.linux.systemd.units.timidity]
+description = "TiMidity++ ALSA MIDI sequencer"
+exec_start = "/usr/bin/timidity -iA"
+restart = "on-failure"
+
 [dotfiles]
 "~/.config/ghostty/config.ghostty" = { source = "dotfiles/ghostty/config.ghostty" }
 "~/.config/wine/font-noaa.conf" = { source = "dotfiles/wine/font-noaa.conf" }
 "~/.local/bin/wine-rpg2000-setup" = { source = "dotfiles/wine/wine-rpg2000-setup" }
 "~/.config/autostart/wine-rpg2000-setup.desktop" = { source = "dotfiles/wine/wine-rpg2000-setup.desktop.tera", mode = "template" }
-
-[bootstrap.linux.systemd.units.timidity]
-description = "TiMidity++ ALSA MIDI sequencer"
-exec_start = "/usr/bin/timidity -iA"
-restart = "on-failure"
 
 # No `run`: this only appends setup:desktop to the bootstrap task of the ubuntu module,
 # which loads before this one (env = ["linux", "ubuntu", "desktop"]; the guard enforces

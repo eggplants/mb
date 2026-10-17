@@ -1,0 +1,7 @@
+# tombi (TOML formatter and linter): `mise run format` / `mise run lint` from the repo root.
+toml-version = "v1.0.0"
+
+# Only conf.d/*/mise.*.toml and .mise.toml match the catalog's mise patterns by name.
+[[schemas]]
+path = "https://mise.jdx.dev/schema/mise.json"
+include = [".mise.toml", "config.toml", "conf.d/*/mise.*.toml", "shared/*.toml"]

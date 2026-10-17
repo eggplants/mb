@@ -108,13 +108,9 @@ adopt = true
 "mas:409203825" = "latest"  # Numbers
 "mas:490179405" = "latest"  # Okta Verify
 "mas:409201541" = "latest"  # Pages
-"mas:6757801838" = "latest" # RunCatNeo
-"mas:1475387142" = "latest" # Tailscale
+"mas:6757801838" = "latest"  # RunCatNeo
+"mas:1475387142" = "latest"  # Tailscale
 "mas:497799835" = "latest"  # Xcode
-
-[dotfiles]
-"~/.gnupg/gpg-agent.conf" = { source = "dotfiles/gnupg/gpg-agent.conf", mode = "copy", permissions = "0600" }
-"~/.config/ghostty/config" = { source = "dotfiles/ghostty/config" }
 
 [bootstrap.user]
 login_shell = "/bin/zsh"
@@ -133,6 +129,10 @@ requires_tools = true
 [bootstrap.hooks]
 # Stop the Homebrew-managed colima LaunchAgent before mise's own one starts.
 post-tools = "bash {{ config_root }}/scripts/stop-brew-colima.sh"
+
+[dotfiles]
+"~/.gnupg/gpg-agent.conf" = { source = "dotfiles/gnupg/gpg-agent.conf", mode = "copy", permissions = "0600" }
+"~/.config/ghostty/config" = { source = "dotfiles/ghostty/config" }
 
 [tasks.bootstrap]
 description = "Run imperative setup steps after the declarative bootstrap"

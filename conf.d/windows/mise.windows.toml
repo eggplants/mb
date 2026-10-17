@@ -54,7 +54,7 @@ ripgrep = "latest"
 "winget:yt-dlp.FFmpeg" = "latest"
 "winget:yt-dlp.yt-dlp" = "latest"
 # Microsoft Store (msstore source)
-"winget:XPDM1ZW6815MQM" = "latest" # VLC
+"winget:XPDM1ZW6815MQM" = "latest"  # VLC
 
 [tasks.bootstrap]
 description = "Run imperative setup steps after the declarative bootstrap"

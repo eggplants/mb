@@ -46,12 +46,12 @@ write_targets.dotfiles = "~/.config/mise/conf.d/termux/mise.termux.toml"
 "pkg:w3m" = "latest"
 "pkg:zsh" = "latest"
 
+[bootstrap.hooks]
+pre-tools = "mise -E {{ mise_env | join(sep=\",\") }} bootstrap packages apply --yes"
+
 [dotfiles]
 "~/.hushlogin" = { source = "dotfiles/hushlogin" }
 "~/.gnupg/gpg-agent.conf" = { source = "dotfiles/gnupg/gpg-agent.conf", mode = "copy", permissions = "0600" }
-
-[bootstrap.hooks]
-pre-tools = "mise -E {{ mise_env | join(sep=\",\") }} bootstrap packages apply --yes"
 
 [tasks.bootstrap]
 description = "Run imperative setup steps after the declarative bootstrap"

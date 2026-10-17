@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-# Read-only checks of this repo: `bash ci/check.sh`. Run by .github/workflows/check.yml on
-# ubuntu-latest, and locally before pushing. Nothing is applied: mise only runs `config ls`,
-# `tasks ls/info`, `bootstrap files status`, `bootstrap --dry-run` and (on Ubuntu)
-# `bootstrap plan`, against copies of the repo in a throwaway HOME.
 set -euo pipefail
 repo="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$repo"
@@ -27,6 +23,8 @@ for re in '^\[tools\]' '^\[bootstrap\.packages\]' '^\[bootstrap\.hooks' '^\[boot
 done
 ! grep -qE '^[[:space:]]*env[[:space:]]*=' miserc.toml || fail "miserc.toml must not set env (per machine: miserc.local.toml)"
 grep -qx 'auto_env = false' miserc.toml || fail "miserc.toml must pin auto_env = false"
+# In ~/.config/mise, mise.toml would be global config on every machine; dev tasks are .mise.toml.
+[[ ! -e mise.toml ]] || fail "mise.toml must not exist at the repo root (dev config: .mise.toml)"
 
 # 2. conf.d holds only folder modules named after their folder: mise loads conf.d/*.toml and
 #    conf.d/<m>/mise.toml on every machine, and conf.d/<m>/mise.<x>.toml for env <x>.
@@ -79,32 +77,25 @@ for sel in "${selections[@]}"; do
   [[ -z "$dups" ]] || fail "duplicate task file(s) for [$sel]: $dups"
 done
 
-# 5. Runtime data and machine pins stay ignored; scripts and tasks stay executable and lint clean.
+# 5. Runtime data and machine pins stay ignored; scripts and tasks stay executable.
 #    PowerShell scripts stay non-executable: an executable tasks/host/check.ps1 would be a second
 #    host:check task on Linux and macOS (mise picks the .ps1 of a pair only on Windows).
 for p in /compose/scanned/ /compose/epgstation/data/ /compose/epgstation/thumbnail/ /compose/epgstation/logs/ \
   miserc.local.toml '*.local.toml'; do
   grep -qxF "$p" .gitignore || fail ".gitignore lacks $p"
 done
-scripts=()
 while read -r f; do
   if [[ "$f" == *.ps1 ]]; then
     [[ ! -x "$f" ]] || fail "$f is executable; PowerShell scripts must not be (chmod -x)"
     continue
   fi
   [[ -x "$f" ]] || fail "$f is not executable"
-  scripts+=("$f")
 done < <({
   echo docs/bootstrap.ps1
   echo docs/bootstrap.sh
   echo ci/check.sh
   find tasks shared/tasks conf.d/*/tasks conf.d/*/scripts conf.d/*/bin conf.d/*/pwsh -type f 2>/dev/null
 } | sort)
-if command -v shellcheck >/dev/null; then
-  shellcheck "${scripts[@]}" || fail "shellcheck"
-else
-  echo "SKIP: shellcheck not found" >&2
-fi
 
 # 6. guard.tera, tasks/host/check and bootstrap.sh detect hosts with the same tests, and every
 #    allowed list is known to the guard and to tasks/host/check; on Windows, tasks/host/check.ps1
@@ -145,6 +136,7 @@ export HOME="$sb/home" XDG_CONFIG_HOME="$sb/home/.config" XDG_DATA_HOME="$sb/hom
   XDG_STATE_HOME="$sb/home/.local/state" XDG_CACHE_HOME="$sb/home/.cache" \
   MISE_DATA_DIR="$sb/data" MISE_STATE_DIR="$sb/state" MISE_CACHE_DIR="$sb/cache" MISE_SYSTEM_CONFIG_DIR="$sb/etc"
 unset MISE_ENV MISE_PROFILE MISE_ENVIRONMENT MISE_CONFIG_DIR MISE_GLOBAL_CONFIG_FILE MISE_OVERRIDE_CONFIG_FILENAMES
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE # set when run from a git hook
 mkdir -p "$XDG_CONFIG_HOME"
 cp -R "$repo" "$XDG_CONFIG_HOME/mise"
 cp -R "$repo" "$sb/preview"

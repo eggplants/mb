@@ -1,0 +1,37 @@
+[tools]
+shellcheck = "0.11.0"
+shfmt = "3.14.1"
+tombi = "1.8.5"
+
+[tasks.format]
+description = "Format TOML and shell scripts"
+depends = ["format:*"]
+
+[tasks."format:toml"]
+description = "Format TOML files with tombi"
+run = "tombi format"
+
+[tasks."format:sh"]
+description = "Format shell scripts with shfmt"
+run = "shfmt -i 2 -ci -w ."
+
+[tasks.lint]
+description = "Lint TOML and shell scripts"
+depends = ["lint:*"]
+
+[tasks."lint:toml"]
+description = "Check TOML formatting and lint against the mise schema with tombi"
+run = ["tombi format --check", "tombi lint --error-on-warnings"]
+
+[tasks."lint:sh"]
+description = "Check shell script formatting with shfmt and lint with shellcheck"
+run = ["shfmt -i 2 -ci -d .", "shfmt -f . | xargs shellcheck"]
+
+[tasks.ci]
+description = "Lint, then run ci/check.sh (what CI runs)"
+depends = ["lint"]
+run = "bash ci/check.sh"
+
+[tasks.pre-commit]
+description = "Run before every commit (git hook)"
+depends = ["ci"]

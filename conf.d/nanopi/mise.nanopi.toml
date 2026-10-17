@@ -148,7 +148,7 @@ enabled = true
 [bootstrap.compose.tv]
 project_dir = "{{ xdg_config_home }}/mise/compose"
 project_name = "tv"
-sudo = true # the user may not be in the docker group yet
+sudo = true  # the user may not be in the docker group yet
 depends_on = ["package:apt:docker-compose-plugin", "service:docker", "file:/etc/docker/daemon.json"]
 
 [dotfiles]

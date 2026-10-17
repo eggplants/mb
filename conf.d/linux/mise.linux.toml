@@ -26,7 +26,7 @@ state = "absent"
 phase = "pre-packages"
 
 [bootstrap.files."/etc/apt/keyrings/docker.asc"]
-source = "files/apt/docker.asc" # conf.d/linux/files/apt/docker.asc
+source = "files/apt/docker.asc"  # conf.d/linux/files/apt/docker.asc
 phase = "pre-packages"
 
 # One template for Ubuntu (ubuntu, <codename>, amd64) and the NanoPi (debian, bookworm, arm64).

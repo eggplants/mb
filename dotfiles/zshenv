@@ -34,13 +34,6 @@ if [[ -f $HOME/.config/systemd/user/docker.service ]]; then
   export DOCKER_HOST="unix://${XDG_RUNTIME_DIR:-/run/user/$UID}/docker.sock"
 fi
 
-# macOS only: shfmt formats in place with 4-space indents
-if [[ $OSTYPE == darwin* ]]; then
-  function shfmt() {
-    command shfmt -i 4 -l -w "$@"
-  }
-fi
-
 # Ubuntu: run wine with a Japanese locale (the desktop module installs wine; the NanoPi has none)
 if [[ $OSTYPE == linux-gnu* ]]; then
   function wine() {

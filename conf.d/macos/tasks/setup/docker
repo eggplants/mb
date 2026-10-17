@@ -5,11 +5,11 @@ set -euo pipefail
 plugins_dir=/opt/homebrew/lib/docker/cli-plugins
 config=~/.docker/config.json
 mkdir -p ~/.docker/cli-plugins
-[[ -s "$config" ]] || echo '{}' > "$config"
+[[ -s "$config" ]] || echo '{}' >"$config"
 
 if ! jq -e --arg d "$plugins_dir" '.cliPluginsExtraDirs // [] | index($d)' "$config" &>/dev/null; then
   tmp="$(mktemp)"
-  jq --arg d "$plugins_dir" '.cliPluginsExtraDirs = ((.cliPluginsExtraDirs // []) + [$d] | unique)' "$config" > "$tmp"
+  jq --arg d "$plugins_dir" '.cliPluginsExtraDirs = ((.cliPluginsExtraDirs // []) + [$d] | unique)' "$config" >"$tmp"
   mv "$tmp" "$config"
 fi
 

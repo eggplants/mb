@@ -7,10 +7,14 @@ The global [mise](https://mise.jdx.dev) config (`mise bootstrap`) for five kinds
 ## Commands
 
 ```bash
-bash ci/check.sh   # the only test: read-only lint, guard checks, and a dry-run of every selection in a throwaway HOME (CI runs it too)
+mise run ci        # the only test (CI runs it too): `lint`, then ci/check.sh (read-only repo rules, guard checks, and a dry-run of every selection in a throwaway HOME)
+mise run format    # format:toml (tombi) and format:sh (shfmt -i 2 -ci); `mise run lint` checks both, lints TOML against the mise schema and runs shellcheck
+mise run pre-commit  # = ci; install the git hook with `mkdir -p .git/hooks && mise generate git-pre-commit --write --task=pre-commit`
 mb --dry-run       # preview on this machine (zsh function in dotfiles/zshrc)
 mb                 # git pull --ff-only, then `cd ~ && mise bootstrap`
 ```
+
+The `mise run` tasks come from `.mise.toml` (repo dev config: tasks plus pinned `tombi`, `shfmt` and `shellcheck`), so run them from the repo root (`mise trust` it once in a checkout outside `~/.config/mise`).
 
 - Never pass `-E`/`-P`, set `MISE_ENV`/`MISE_PROFILE`/`MISE_ENVIRONMENT`, or use `-C`: they *replace* the machine's env list. Always run mise from `~`, never from inside `conf.d/`.
 - To preview another platform, use `bash ci/check.sh`; the guard intentionally rejects `mise -E <other platform>` on this host.
@@ -42,6 +46,7 @@ mb                 # git pull --ff-only, then `cd ~ && mise bootstrap`
 - Package managers stay in their module: `brew:`/`brew-cask:`/`mas:` in macos, `apt:` in linux/ubuntu/desktop/nanopi, `pkg:` in termux, `winget:` in windows (checked by CI).
 - `plugins/pkg/` adds the `pkg:` package manager for Termux (mise's `apt` is skipped on `android`). `bootstrap.sh` links it with `mise plugins link`.
 - `compose/` is the NanoPi Compose project `tv` (mirakc, MariaDB, EPGStation, edcb-bridge). Its `scanned/` and EPGStation runtime dirs are gitignored data — never `git clean -x` on the NanoPi.
+- `.mise.toml` and `tombi.toml` are dev config for this repo only. Never name it `mise.toml`: in `~/.config/mise` that is global config and would load on every machine (`ci/check.sh` checks), while `.mise.toml` loads only when mise runs inside the checkout. Commit TOML formatted (`mise run format`); tombi groups tables by parent and moves their leading comments with them.
 - `docs/` is served at <https://egpl.dev/mb/>: `bootstrap.sh`, `bootstrap.ps1`, `autoinstall.yaml`.
 
 Prefer declarative `[bootstrap.*]`/`[dotfiles]`; use tasks or hooks only for the rest, and make them idempotent (they run on every `mise bootstrap`).
@@ -56,7 +61,7 @@ Prefer declarative `[bootstrap.*]`/`[dotfiles]`; use tasks or hooks only for the
 - Windows tasks are non-executable `.ps1` files (`setup/pwsh.ps1` → `setup:pwsh`); keep them `chmod -x`, or Linux/macOS list them as tasks. Nothing in CI runs the PowerShell code.
 - Termux: prebuilt glibc binaries don't run, so tools come from `pkg:` or are built locally (`cargo:`, `go:`, `pipx:`). Termux tasks must not depend on `/usr/bin/env` outside mise.
 - `mise bootstrap unapply <module>` deletes what the module declares; only `mb unapply desktop` is supported.
-- `config.toml` requires mise `min_version` 2026.10.7; bump it together with `MISE_VERSION` in `.github/workflows/check.yml`.
+- `config.toml` requires mise `min_version` 2026.10.7; CI (`.github/workflows/check.yml`) installs the latest mise through mise-action, at least 7 days old.
 - Fix forward, don't `git revert` old commits: rename detection can carry a per-platform revert into a shared file. Use `git log -- <path>` / `git blame -C` for history (not `--follow`).
 
 ## Test Termux in Docker

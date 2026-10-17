@@ -14,12 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install mise (same version as min_version in config.toml)
-        run: |
-          curl -fsSL https://mise.run | MISE_VERSION=v2026.10.7 sh
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          minimum_release_age: 7d
 
-      - name: ci/check.sh
-        run: bash ci/check.sh
+      - run: mise run ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -50,7 +50,7 @@ for uuid in runcat@kolesnikov.se caffeine@patapon.info; do
   gnome-extensions install --force "$tmp/$uuid.zip"
 done
 
-dconf load / < "$config_dir/conf.d/desktop/files/dconf/desktop.ini"
+dconf load / <"$config_dir/conf.d/desktop/files/dconf/desktop.ini"
 
 if [[ "$(xdg-settings get default-web-browser 2>/dev/null)" != google-chrome.desktop ]]; then
   xdg-settings set default-web-browser google-chrome.desktop
