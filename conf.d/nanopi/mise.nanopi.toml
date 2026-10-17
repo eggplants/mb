@@ -10,6 +10,8 @@ write_targets.dotfiles = "~/.config/mise/conf.d/nanopi/mise.nanopi.toml"
 [tools]
 python = "latest"
 lazydocker = "latest"
+ripgrep = "latest"
+"aqua:azu/dockerfile-pin" = "latest"
 
 [bootstrap.packages]
 "apt:dialog" = "latest"

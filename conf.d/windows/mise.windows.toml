@@ -3,6 +3,10 @@ write_targets.tools = "~/.config/mise/conf.d/windows/mise.windows.toml"
 write_targets.packages = "~/.config/mise/conf.d/windows/mise.windows.toml"
 write_targets.dotfiles = "~/.config/mise/conf.d/windows/mise.windows.toml"
 
+[tools]
+ripgrep = "latest"
+"aqua:azu/dockerfile-pin" = "latest"
+
 [bootstrap.packages]
 "winget:Git.Git" = "latest"
 "winget:jdx.mise" = "latest"
