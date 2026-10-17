@@ -45,6 +45,8 @@ mode = "template"
 "~/.nanorc" = { source = "dotfiles/nanorc" }
 # Machines with a GPG key only: with no matching variant (the NanoPi) the entry is skipped.
 "~/.gitconfig" = { source = "dotfiles/gitconfig", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
+# User-scope Claude Code skills, on the machines that install Claude Code.
+"~/.claude/skills/commit/SKILL.md" = { source = "dotfiles/claude/skills/commit/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
 
 # ~/.zshrc is a whole-file dotfile that activates mise itself, so zsh = true only adds the
 # shims to ~/.zprofile (what macOS spelled zprofile = "shims"); bash gets both files (Git Bash

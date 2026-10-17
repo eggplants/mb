@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
-#MISE description="Point Claude Code's statusLine at claude-statusbar"
+#MISE description="Point Claude Code's statusLine at claude-statusbar and install user-scope plugins"
 set -euo pipefail
+
+# user-scope plugin marketplaces (name=source) and plugins (name@marketplace)
+marketplaces=(
+  claude-community=anthropics/claude-plugins-community
+  yomiyasu=nanaism/yomiyasu
+)
+plugins=(
+  eli5@claude-community
+  yomiyasu@yomiyasu
+)
 
 # claude-statusbar
 cmd="$(jq -r '.statusLine.command // ""' ~/.claude/settings.json 2>/dev/null || :)"
@@ -19,3 +29,13 @@ if [[ "$(jq -c '.statusLine' "$dst" 2>/dev/null || :)" != "$line" ]]; then
   jq --argjson line "$line" '.statusLine = $line' "$dst" >"$tmp"
   mv "$tmp" "$dst"
 fi
+
+# plugins
+have="$(claude plugin marketplace list --json | jq -r '.[].name')"
+for m in "${marketplaces[@]}"; do
+  grep -qxF "${m%%=*}" <<<"$have" || claude plugin marketplace add --scope user "${m#*=}"
+done
+have="$(claude plugin list --json | jq -r '.[] | select(.scope == "user") | .id')"
+for p in "${plugins[@]}"; do
+  grep -qxF "$p" <<<"$have" || claude plugin install --scope user "$p"
+done
