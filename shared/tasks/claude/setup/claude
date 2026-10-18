@@ -5,10 +5,16 @@ set -euo pipefail
 # user-scope plugin marketplaces (name=source) and plugins (name@marketplace)
 marketplaces=(
   claude-community=anthropics/claude-plugins-community
+  claude-plugins-official=anthropics/claude-plugins-official
+  cursor-plugins=cursor/plugins
+  googlechrome=GoogleChrome/modern-web-guidance
   yomiyasu=nanaism/yomiyasu
 )
 plugins=(
+  claude-security@claude-plugins-official
   eli5@claude-community
+  modern-web-guidance@googlechrome
+  pstack@cursor-plugins
   yomiyasu@yomiyasu
 )
 
