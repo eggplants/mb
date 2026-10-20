@@ -49,6 +49,7 @@ restart = "on-failure"
 "~/.config/wine/font-noaa.conf" = { source = "dotfiles/wine/font-noaa.conf" }
 "~/.local/bin/wine-rpg2000-setup" = { source = "dotfiles/wine/wine-rpg2000-setup" }
 "~/.config/autostart/wine-rpg2000-setup.desktop" = { source = "dotfiles/wine/wine-rpg2000-setup.desktop.tera", mode = "template" }
+"~/.local/share/applications/android-studio.desktop" = { source = "dotfiles/android-studio/android-studio.desktop.tera", mode = "template" }
 
 # No `run`: this only appends setup:desktop to the bootstrap task of the ubuntu module,
 # which loads before this one (env = ["linux", "ubuntu", "desktop"]; the guard enforces

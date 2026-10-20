@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Desktop setup: GNOME settings/extensions, fonts, AppManager"
+#MISE description="Desktop setup: GNOME settings/extensions, fonts, AppManager, Android Studio"
 #MISE depends=["setup:vscode"]
 set -euo pipefail
 
@@ -30,6 +30,28 @@ if [[ ! -x ~/Applications/AppManager ]]; then
   chmod +x "$tmp/AppManager.AppImage"
   "$tmp/AppManager.AppImage" install "$tmp/AppManager.AppImage"
 fi
+
+# Android Studio: unpacked into a user-writable dir so its own updater can
+# patch it; `studio` is linked into ~/.local/bin and the launcher is a
+# [dotfiles] entry. Staged on disk, not in $tmp: the archive is 1.6 GB and
+# /tmp is a tmpfs.
+if [[ ! -x ~/.local/share/android-studio/bin/studio.sh ]]; then
+  read -r url sum < <(
+    curl -fsSL https://jb.gg/android-studio-releases-list.json |
+      jq -r '[.content.item[] | select(.channel == "Release")][0].download[]
+        | select(.link | endswith("-linux.tar.gz")) | "\(.link) \(.checksum)"'
+  )
+  mkdir -p ~/.local/share
+  staging="$(mktemp -d ~/.local/share/.android-studio.XXXXXX)"
+  trap 'rm -rf "$tmp" "$staging"' EXIT
+  curl -fL --retry 3 -o "$staging/studio.tar.gz" "$url"
+  echo "$sum  $staging/studio.tar.gz" | sha256sum -c --quiet -
+  tar -xzf "$staging/studio.tar.gz" -C "$staging"
+  rm -rf ~/.local/share/android-studio
+  mv "$staging/android-studio" ~/.local/share/android-studio
+fi
+mkdir -p ~/.local/bin
+ln -sfn ~/.local/share/android-studio/bin/studio ~/.local/bin/studio
 
 # GNOME needs a D-Bus session; run `mise run setup:desktop` again from a
 # graphical login if this was skipped.

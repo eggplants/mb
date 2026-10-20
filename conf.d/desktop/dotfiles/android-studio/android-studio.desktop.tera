@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Android Studio
+Exec={{ env.HOME }}/.local/share/android-studio/bin/studio.sh %f
+Icon={{ env.HOME }}/.local/share/android-studio/bin/studio.svg
+Categories=Development;IDE;
+Terminal=false
+StartupWMClass=jetbrains-studio
+StartupNotify=true
