@@ -1,7 +1,7 @@
 [tools]
-shellcheck = "0.11.0"
-shfmt = "3.14.1"
-tombi = "1.8.5"
+shellcheck = { version = "0.11.0", os = ["linux", "macos", "windows"] }
+shfmt = { version = "3.14.1", os = ["linux", "macos", "windows"] }
+tombi = { version = "1.8.5", os = ["linux", "macos", "windows"] }
 
 [tasks.format]
 description = "Format TOML and shell scripts"
