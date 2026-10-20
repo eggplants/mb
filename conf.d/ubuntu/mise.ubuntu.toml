@@ -1,7 +1,7 @@
 # Ubuntu (amd64), headless part. Loads after conf.d/linux (apt base, Docker repository key,
 # login shell); conf.d/desktop is an add-on that loads after this one.
 
-# ruby, node, go, rust, uv, claude, gh, jq, pinact, ripgrep, yt-dlp, dockerfile-pin and claude-statusbar
+# ruby, node, go, rust, uv, claude, gh, glab, jq, pinact, ripgrep, yt-dlp, dockerfile-pin and claude-statusbar
 include = ["../../shared/workstation-tools.toml"]
 
 [settings]
