@@ -8,11 +8,13 @@ marketplaces=(
   claude-plugins-official=anthropics/claude-plugins-official
   cursor-plugins=cursor/plugins
   googlechrome=GoogleChrome/modern-web-guidance
+  humanize-writing-skill=eggplants/humanize-writing-skill
   yomiyasu=nanaism/yomiyasu
 )
 plugins=(
   claude-security@claude-plugins-official
   eli5@claude-community
+  humanize-writing@humanize-writing-skill
   modern-web-guidance@googlechrome
   pstack@cursor-plugins
   yomiyasu@yomiyasu
