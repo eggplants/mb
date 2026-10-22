@@ -28,7 +28,7 @@ yq = "latest"
 "aqua:k1LoW/mo" = "latest"
 "aqua:sibprogrammer/xq" = "latest"
 "pipx:claude-monitor" = "latest"
-"pipx:gw2aws" = "0.0.3"
+"pipx:gw2aws" = "0.1.2"
 
 # Casks installed by Homebrew count as installed; take over identical apps.
 [bootstrap.brew]
@@ -88,6 +88,7 @@ adopt = true
 "brew-cask:android-commandlinetools" = "latest"
 "brew-cask:android-studio" = "latest"
 "brew-cask:aws-vpn-client" = "latest"
+"brew-cask:claude" = "latest"
 "brew-cask:font-guguru-sans-code" = "latest"
 "brew-cask:font-hackgen-nerd" = "latest"
 "brew-cask:ghostty" = "latest"
