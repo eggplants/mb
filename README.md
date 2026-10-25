@@ -15,7 +15,8 @@
 ## Update
 
 ```bash
-mb
+mb --update
+mb packages upgrade
 ```
 
 ## Setup
