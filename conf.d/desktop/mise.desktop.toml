@@ -18,6 +18,11 @@
 "apt:winehq-devel" = "latest"
 "apt:winetricks" = "latest"
 "apt:language-pack-ja" = "latest"
+"apt:flatpak" = "latest"
+"apt:gnome-software-plugin-flatpak" = "latest"
+# Installed after apt in the same run (mise applies apt before flatpak), from the
+# Flathub remote that flatpak imports from /etc/flatpak/remotes.d below
+"flatpak:org.gnome.Lollypop" = "latest"
 
 [bootstrap.hooks]
 pre-packages = "bash {{ config_root }}/scripts/install-vendor-debs.sh"
@@ -38,6 +43,12 @@ Components: main
 Architectures: amd64 i386
 Signed-By: /etc/apt/keyrings/winehq.asc
 """
+
+# flatpak adds each system remote dropped here that it has not added before
+# (and never again once removed), so Flathub needs no `flatpak remote-add`
+[bootstrap.files."/etc/flatpak/remotes.d/flathub.flatpakrepo"]
+source = "files/flatpak/flathub.flatpakrepo"
+phase = "pre-packages"
 
 [bootstrap.linux.systemd.units.timidity]
 description = "TiMidity++ ALSA MIDI sequencer"

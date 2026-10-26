@@ -52,6 +52,7 @@ check_only() { # <pattern> <allowed module folders...>
 }
 check_only '^"brew(-cask)?:|^"mas:' macos
 check_only '^"apt:' linux ubuntu desktop nanopi
+check_only '^"flatpak(-user)?:' desktop
 check_only '^"pkg:' termux
 check_only '^"winget:' windows
 if compgen -G 'shared/*.toml' >/dev/null; then
