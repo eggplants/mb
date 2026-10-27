@@ -9,6 +9,7 @@ marketplaces=(
   cursor-plugins=cursor/plugins
   googlechrome=GoogleChrome/modern-web-guidance
   humanize-writing-skill=eggplants/humanize-writing-skill
+  natural-japanese=coji/natural-japanese
   yomiyasu=nanaism/yomiyasu
 )
 plugins=(
@@ -16,6 +17,7 @@ plugins=(
   eli5@claude-community
   humanize-writing@humanize-writing-skill
   modern-web-guidance@googlechrome
+  natural-japanese@natural-japanese
   pstack@cursor-plugins
   yomiyasu@yomiyasu
 )
