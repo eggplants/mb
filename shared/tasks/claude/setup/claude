@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Point Claude Code's statusLine at claude-statusbar and install user-scope plugins, also for mclaude"
+#MISE description="Point Claude Code's statusLine at claude-statusbar and install user-scope plugins and MCP servers, also for mclaude"
 set -euo pipefail
 
 # user-scope plugin marketplaces (name=source) and plugins (name@marketplace)
@@ -19,6 +19,15 @@ plugins=(
   pstack@cursor-plugins
   yomiyasu@yomiyasu
 )
+# user-scope MCP servers (name=command), added only when the command is installed
+mcp_servers=(
+  'trivy=trivy mcp'
+)
+
+# trivy MCP server plugin
+if command -v trivy &>/dev/null && ! trivy plugin info mcp &>/dev/null; then
+  trivy plugin install mcp
+fi
 
 # claude-statusbar
 cmd="$(jq -r '.statusLine.command // ""' ~/.claude/settings.json 2>/dev/null || :)"
@@ -65,5 +74,10 @@ for dir in '' ~/.mclaude; do
   have="$("${c[@]}" plugin list --json | jq -r '.[] | select(.scope == "user") | .id')"
   for p in "${plugins[@]}"; do
     grep -qxF "$p" <<<"$have" || "${c[@]}" plugin install --scope user "$p"
+  done
+  for s in "${mcp_servers[@]}"; do
+    read -ra cmd <<<"${s#*=}"
+    command -v "${cmd[0]}" &>/dev/null || continue
+    "${c[@]}" mcp get "${s%%=*}" &>/dev/null || "${c[@]}" mcp add --scope user "${s%%=*}" -- "${cmd[@]}"
   done
 done
