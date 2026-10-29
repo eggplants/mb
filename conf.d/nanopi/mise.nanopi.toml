@@ -109,6 +109,21 @@ content = """
 """
 notify = ["docker"]
 
+# Prometheus (Debian's default config scrapes node-exporter as job "node") for the
+# Node Exporter Full dashboard
+[bootstrap.files."/etc/grafana/provisioning/datasources/prometheus.yaml"]
+content = """
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://localhost:9090
+    isDefault: true
+"""
+notify = ["grafana-server"]
+
 [bootstrap.directories."/mnt/hdd1/recorded"]
 mode = "0777"
 
