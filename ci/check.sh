@@ -78,11 +78,10 @@ for sel in "${selections[@]}"; do
   [[ -z "$dups" ]] || fail "duplicate task file(s) for [$sel]: $dups"
 done
 
-# 5. Runtime data and machine pins stay ignored; scripts and tasks stay executable.
+# 5. Machine pins stay ignored; scripts and tasks stay executable.
 #    PowerShell scripts stay non-executable: an executable tasks/host/check.ps1 would be a second
 #    host:check task on Linux and macOS (mise picks the .ps1 of a pair only on Windows).
-for p in /compose/scanned/ /compose/epgstation/data/ /compose/epgstation/thumbnail/ /compose/epgstation/logs/ \
-  miserc.local.toml '*.local.toml'; do
+for p in miserc.local.toml '*.local.toml'; do
   grep -qxF "$p" .gitignore || fail ".gitignore lacks $p"
 done
 while read -r f; do

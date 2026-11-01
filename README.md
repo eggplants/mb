@@ -74,8 +74,8 @@ In PowerShell, as yourself (not as Administrator):
 <details>
 
 - Machine: [NanoPi R6S](https://www.friendlyelec.com/index.php?route=product/product&product_id=289)
-- Tuner: [PX-W3U4](https://plex-net.co.jp/itemreco/px-w3u4/) (`/dev/px4video{0..3}`)
-- Card reader: [SCR3310 v2.0](https://www.ntt.com/business/services/application/authentication/jpki/download10.html)
+- Tuner: [PX-W3U4](https://plex-net.co.jp/itemreco/px-w3u4/) (driven over libusb by [denpa](https://github.com/danything/denpa); `px4_drv` is blacklisted)
+- Card reader: [SCR3310 v2.0](https://www.ntt.com/business/services/application/authentication/jpki/download10.html) with a B-CAS card
 - OS: [rk3568-sd-debian-bookworm-core-6.1-arm64-20250811.img](https://drive.google.com/file/d/1hA3pUcZzdfSN1htq-3Nxn5ECr0EA1sa6/view?usp=drive_link) (Debian 12 / Linux 6.1, aarch64)
 
 Connect a display and keyboard, log in as `pi`, and create your user:
@@ -96,18 +96,12 @@ mb
 
 If `/mnt/hdd1` is not mounted, `bootstrap.sh` first runs `mise run hdd:init`. It asks you to insert the external disk, then **formats** it after a confirmation.
 
-#### Tasks
-
-```bash
-mise run tv:playlist                           # writes channels.m3u8 to the current directory
-rm -rf ~/.config/mise/compose/scanned && mb    # scan the channels again
-```
+On a new disk, open denpa, check the tuners and the card reader in Settings > Reception, and scan the channels there.
 
 #### Check
 
-- mirakc: `http://npi01.<tailnet>.ts.net:40772/api/version`
-- EPGStation: `http://npi01.<tailnet>.ts.net:8888/#/`
-- KonomiTV: `https://<tailscale-ip-with-dashes>.local.konomi.tv:7000/tv/`
+- denpa: `http://npi01:3001` (not the `.ts.net` name, which is not in `ALLOWED_HOSTS`; not `localhost`, which reaches denpa through Docker and is refused)
+- Tuner agent: `curl -s localhost:25252/denpa/card | jq` on the NanoPi
 - Grafana: `http://npi01.<tailnet>.ts.net:3000`
 
 </details>

@@ -6,8 +6,3 @@
 miserc.local.toml
 miserc.local.toml.bak.*
 *.local.toml
-# NanoPi runtime data under compose/ (generated; never `git clean -x` this checkout)
-/compose/scanned/
-/compose/epgstation/data/
-/compose/epgstation/thumbnail/
-/compose/epgstation/logs/

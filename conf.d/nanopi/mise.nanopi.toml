@@ -21,19 +21,12 @@ ripgrep = "latest"
 "apt:openssh-server" = "latest"
 "apt:avahi-daemon" = "latest"
 "apt:tailscale" = "latest"
-"apt:nodejs" = "latest"
-"apt:npm" = "latest"
 "apt:gcc" = "latest"
 "apt:python3-dev" = "latest"
 "apt:lshw" = "latest"
-"apt:libvorbis-dev" = "latest"
 "apt:prometheus" = "latest"
 "apt:prometheus-node-exporter" = "latest"
 "apt:grafana-enterprise" = "latest"
-
-[bootstrap.hooks]
-# px4_drv, recisdb, ISDBScanner, rkmppenc deps, and the first channel scan
-post-packages = "bash {{ config_root }}/scripts/install-debs.sh"
 
 # apt sources
 
@@ -103,6 +96,10 @@ content = "LANG=en_US.UTF-8\n"
 content = "PasswordAuthentication no\n"
 notify = ["ssh"]
 
+# denpa's tuner agent drives the PX-W3U4 over libusb; px4_drv would hold the device
+[bootstrap.files."/etc/modprobe.d/blacklist-px4_drv.conf"]
+content = "blacklist px4_drv\n"
+
 [bootstrap.files."/etc/docker/daemon.json"]
 content = """
 {"storage-driver": "fuse-overlayfs"}
@@ -124,11 +121,12 @@ datasources:
 """
 notify = ["grafana-server"]
 
-[bootstrap.directories."/mnt/hdd1/recorded"]
-mode = "0777"
+# denpa's config (tuners, channels) and recordings; its database is the volume denpa_denpa-data
+[bootstrap.directories."/mnt/hdd1/denpa/config"]
 
-[bootstrap.directories."/mnt/hdd1/TV-Capture"]
-mode = "0777"
+[bootstrap.directories."/mnt/hdd1/denpa/raw"]
+
+[bootstrap.directories."/mnt/hdd1/denpa/encoded"]
 
 [bootstrap.services.ssh]
 state = "running"
@@ -158,11 +156,11 @@ enabled = true
 state = "running"
 enabled = true
 
-# mirakc / MariaDB / EPGStation / edcb-bridge
+# denpa and its tuner agent
 
-[bootstrap.compose.tv]
+[bootstrap.compose.denpa]
 project_dir = "{{ xdg_config_home }}/mise/compose"
-project_name = "tv"
+project_name = "denpa"
 sudo = true  # the user may not be in the docker group yet
 depends_on = ["package:apt:docker-compose-plugin", "service:docker", "file:/etc/docker/daemon.json"]
 
@@ -172,7 +170,7 @@ depends_on = ["package:apt:docker-compose-plugin", "service:docker", "file:/etc/
 [tasks.bootstrap]
 description = "Run imperative setup steps after the declarative bootstrap"
 depends = ["host:check"]
-run = [{ task = "setup:system" }, { task = "setup:docker" }, { task = "setup:konomitv" }]
+run = [{ task = "setup:system" }, { task = "setup:docker" }]
 
 [task_config]
 includes = ["tasks"]
