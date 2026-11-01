@@ -105,6 +105,11 @@ ACTION=="add", SUBSYSTEM=="scsi", ENV{DEVTYPE}=="scsi_device", ATTRS{idVendor}==
   ATTR{timeout}="180"
 """
 
+# the denpa container's AppArmor profile (compose/compose.yaml)
+[bootstrap.files."/etc/apparmor.d/docker-denpa"]
+source = "files/apparmor/docker-denpa"
+notify = ["apparmor"]
+
 [bootstrap.files."/etc/docker/daemon.json"]
 content = """
 {"storage-driver": "fuse-overlayfs"}
@@ -145,6 +150,11 @@ enabled = true
 state = "running"
 enabled = true
 
+# oneshot: loads /etc/apparmor.d; restarted when docker-denpa changes
+[bootstrap.services.apparmor]
+state = "running"
+enabled = true
+
 [bootstrap.services.docker]
 state = "running"
 enabled = true
@@ -167,7 +177,12 @@ enabled = true
 project_dir = "{{ xdg_config_home }}/mise/compose"
 project_name = "denpa"
 sudo = true  # the user may not be in the docker group yet
-depends_on = ["package:apt:docker-compose-plugin", "service:docker", "file:/etc/docker/daemon.json"]
+depends_on = [
+  "package:apt:docker-compose-plugin",
+  "service:docker",
+  "file:/etc/docker/daemon.json",
+  "service:apparmor",
+]
 
 [dotfiles]
 "~/.ssh/authorized_keys" = { source = "files/ssh/authorized_keys", mode = "copy", permissions = "0600" }
