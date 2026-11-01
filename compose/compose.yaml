@@ -1,16 +1,12 @@
 # https://github.com/danything/denpa/blob/main/compose.prod.yml, with the NanoPi's changes merged in.
-# The tuner agent drives the PX-W3U4 over libusb (px4_drv is blacklisted) and decodes B25 with
-# the B-CAS card in the external USB reader.
 name: denpa
 services:
   tuner-agent:
     image: ghcr.io/danything/denpa-agent:2.21.1@sha256:b510ef31e59d4342fe7d4eb86efa457fd6c957a087c2eac82e0d6cd6fd30e290
     restart: unless-stopped
-    # it streams the TS of running recordings, so it must outlive denpa's SHUTDOWN_WAIT
     stop_grace_period: 6h5m
     cap_add:
       - SYS_RESOURCE
-    # USB (189) and DVB (212) character devices, including nodes added by replugging
     device_cgroup_rules:
       - "c 189:* rmw"
       - "c 212:* rmw"
@@ -20,28 +16,23 @@ services:
       - /dev/bus/usb:/dev/bus/usb
       - /dev/dvb:/dev/dvb
     ports:
-      - "127.0.0.1:25252:25252" # no authentication; only for `curl localhost:25252/denpa/card`
+      - "127.0.0.1:25252:25252"
   denpa:
     image: ghcr.io/danything/denpa:2.21.1@sha256:4cd655244dce6a04f1eda72f177352ae499685a5d0499cfeaf05f99cb0ef9786
     restart: unless-stopped
-    # waits for running recordings to finish before stopping
     stop_grace_period: 6h5m
     depends_on:
       - tuner-agent
     environment:
       TZ: Asia/Tokyo
-      # LAN and the whole tailnet get in without logging in. Never add Docker's 172.16.0.0/12:
-      # everything relayed by Docker (including localhost) would get in.
       TRUSTED_NETWORKS: 192.168.0.0/16,10.0.0.0/8,100.64.0.0/10
-      # software encoding on arm64
       ENCODE_CONCURRENCY: "1"
     volumes:
       - denpa-data:/data # denpa_denpa-data
       - /mnt/hdd1/denpa/raw:/media/raw
       - /mnt/hdd1/denpa/encoded:/media/encoded
     ports:
-      # IPv4 only: over IPv6, docker-proxy makes clients look like the Docker gateway (172.x),
-      # which is not trusted; browsers then retry over IPv4. 3000 is Grafana's.
+      # IPv4 only
       - "0.0.0.0:3001:3000"
 volumes:
   denpa-data:

@@ -2,7 +2,6 @@
 # Docker repository key, login shell).
 
 [settings]
-# `mise use -g`, `mise bootstrap packages use -g` and `mise dot add` write here, not into config.toml
 write_targets.tools = "~/.config/mise/conf.d/nanopi/mise.nanopi.toml"
 write_targets.packages = "~/.config/mise/conf.d/nanopi/mise.nanopi.toml"
 write_targets.dotfiles = "~/.config/mise/conf.d/nanopi/mise.nanopi.toml"
@@ -100,10 +99,6 @@ notify = ["ssh"]
 [bootstrap.files."/etc/modprobe.d/blacklist-px4_drv.conf"]
 content = "blacklist px4_drv\n"
 
-# The HDD at /mnt/hdd1 is behind an ASMedia bridge (174c:225c, Ugreen case). The SCSI timeout
-# (default 30 s) leaves room for the disk to spin up.
-# No usb-storage quirk to skip uas: both drivers are built into the FriendlyELEC kernel and bind
-# before udev runs, and re-authorizing the device to rebind it left no disk (the boot then hung).
 [bootstrap.files."/etc/udev/rules.d/90-hdd1.rules"]
 content = """
 ACTION=="add", SUBSYSTEM=="scsi", ENV{DEVTYPE}=="scsi_device", ATTRS{idVendor}=="174c", ATTRS{idProduct}=="225c", \\
