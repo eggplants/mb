@@ -100,6 +100,18 @@ notify = ["ssh"]
 [bootstrap.files."/etc/modprobe.d/blacklist-px4_drv.conf"]
 content = "blacklist px4_drv\n"
 
+# The HDD at /mnt/hdd1 is behind an ASMedia bridge (174c:225c, Ugreen case). usb-storage and uas
+# are built into the FriendlyELEC kernel, so modprobe.d cannot set the quirk: set it when the
+# device first appears (at boot), then re-authorize it so it binds to usb-storage instead of uas.
+# The SCSI timeout (default 30 s) leaves room for the disk to spin up.
+[bootstrap.files."/etc/udev/rules.d/90-hdd1.rules"]
+content = """
+ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="174c", ATTR{idProduct}=="225c", \\
+  RUN+="/bin/sh -c 'grep -q 174c:225c:u /sys/module/usb_storage/parameters/quirks || { echo 174c:225c:u >/sys/module/usb_storage/parameters/quirks; echo 0 >/sys%p/authorized; echo 1 >/sys%p/authorized; }'"
+ACTION=="add", SUBSYSTEM=="scsi", ENV{DEVTYPE}=="scsi_device", ATTRS{idVendor}=="174c", ATTRS{idProduct}=="225c", \\
+  ATTR{timeout}="180"
+"""
+
 [bootstrap.files."/etc/docker/daemon.json"]
 content = """
 {"storage-driver": "fuse-overlayfs"}
