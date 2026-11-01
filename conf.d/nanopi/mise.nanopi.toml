@@ -171,7 +171,7 @@ enabled = true
 state = "running"
 enabled = true
 
-# denpa and its tuner agent
+# denpa, its tuner agent and genkan's proxy
 
 [bootstrap.compose.denpa]
 project_dir = "{{ xdg_config_home }}/mise/compose"

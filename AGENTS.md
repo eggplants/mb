@@ -45,7 +45,7 @@ The `mise run` tasks come from `.mise.toml` (repo dev config: tasks plus pinned 
 - `shared/tasks/{gpg,claude,workstation}/` are bash file tasks pulled in through `[task_config] includes`. No task name may be defined in two directories that load together (`ci/check.sh` checks).
 - Package managers stay in their module: `brew:`/`brew-cask:`/`mas:` in macos, `apt:` in linux/ubuntu/desktop/nanopi, `flatpak:` in desktop, `pkg:` in termux, `winget:` in windows (checked by CI).
 - `plugins/pkg/` adds the `pkg:` package manager for Termux (mise's `apt` is skipped on `android`). `bootstrap.sh` links it with `mise plugins link`.
-- `compose/` is the NanoPi Compose project `denpa` (denpa and its tuner agent). Its data is outside the repo: `/mnt/hdd1/denpa/` and the volume `denpa_denpa-data`.
+- `compose/` is the NanoPi Compose project `denpa` (denpa, its tuner agent and genkan's proxy on ports 80 and 443). Its data is outside the repo: `/mnt/hdd1/denpa/`, the volume `denpa_denpa-data` and Caddy's internal CA in `denpa_caddy-data`.
 - `.mise.toml` and `tombi.toml` are dev config for this repo only. Never name it `mise.toml`: in `~/.config/mise` that is global config and would load on every machine (`ci/check.sh` checks), while `.mise.toml` loads only when mise runs inside the checkout. Commit TOML formatted (`mise run format`); tombi groups tables by parent and moves their leading comments with them.
 - `docs/` is served at <https://egpl.dev/mb/>: `bootstrap.sh`, `bootstrap.ps1`, `autoinstall.yaml`.
 

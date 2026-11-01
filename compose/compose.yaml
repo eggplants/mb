@@ -1,6 +1,22 @@
 # https://github.com/danything/denpa/blob/main/compose.prod.yml, with the NanoPi's changes merged in.
 name: denpa
 services:
+  # genkan's proxy (https://github.com/danything/genkan/blob/main/compose.yml), without Arcane
+  genkan:
+    image: lucaslorentz/caddy-docker-proxy:2.13.1-alpine@sha256:3e6cf4a6382da0cd14108a69929d7f8cc59e9a59cae4c9795071fa392ffa8036
+    restart: unless-stopped
+    environment:
+      CADDY_INGRESS_NETWORKS: genkan
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - caddy-data:/data
+    networks:
+      genkan:
+        ipv4_address: 172.30.0.2 # denpa's TRUSTED_PROXIES
+    ports:
+      # IPv4 only
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
   tuner-agent:
     image: ghcr.io/danything/denpa-agent:2.21.1@sha256:b510ef31e59d4342fe7d4eb86efa457fd6c957a087c2eac82e0d6cd6fd30e290
     restart: unless-stopped
@@ -26,6 +42,7 @@ services:
     environment:
       TZ: Asia/Tokyo
       TRUSTED_NETWORKS: 192.168.0.0/16,10.0.0.0/8,100.64.0.0/10
+      TRUSTED_PROXIES: 172.30.0.2
       ENCODE_CONCURRENCY: "1"
     # Rockchip MPP
     devices:
@@ -38,8 +55,22 @@ services:
       - denpa-data:/data # denpa_denpa-data
       - /mnt/hdd1/denpa/raw:/media/raw
       - /mnt/hdd1/denpa/encoded:/media/encoded
-    ports:
-      # IPv4 only
-      - "0.0.0.0:3001:3000"
+    labels:
+      # HTTPS with Caddy's internal CA; HTTP stays (no redirect) for clients without its root
+      caddy: http://npi01, http://npi01.local, https://npi01, https://npi01.local
+      caddy.tls: internal
+      caddy.@outside: not remote_ip private_ranges 100.64.0.0/10
+      caddy.respond: "@outside 403"
+      caddy.reverse_proxy: "{{upstreams 3000}}"
+    networks: [default, genkan]
 volumes:
   denpa-data:
+  caddy-data:
+networks:
+  genkan:
+    name: genkan
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+          gateway: 172.30.0.1
+          ip_range: 172.30.0.128/25 # keeps 172.30.0.2 free for genkan
