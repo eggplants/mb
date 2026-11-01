@@ -27,6 +27,13 @@ services:
       TZ: Asia/Tokyo
       TRUSTED_NETWORKS: 192.168.0.0/16,10.0.0.0/8,100.64.0.0/10
       ENCODE_CONCURRENCY: "1"
+    # Rockchip MPP
+    devices:
+      - /dev/mpp_service:/dev/mpp_service
+      - /dev/dma_heap:/dev/dma_heap
+    security_opt:
+      - apparmor=docker-denpa
+      - systempaths=unconfined
     volumes:
       - denpa-data:/data # denpa_denpa-data
       - /mnt/hdd1/denpa/raw:/media/raw
