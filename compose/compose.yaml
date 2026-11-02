@@ -17,6 +17,9 @@ services:
       # IPv4 only
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
+    labels:
+      # Global option: IP clients send no SNI, and after DNAT the local address is 172.30.0.2
+      caddy.default_sni: 192.168.100.23
   tuner-agent:
     image: ghcr.io/danything/denpa-agent:2.21.1@sha256:b510ef31e59d4342fe7d4eb86efa457fd6c957a087c2eac82e0d6cd6fd30e290
     restart: unless-stopped
@@ -57,11 +60,12 @@ services:
       - /mnt/hdd1/denpa/encoded:/media/encoded
     labels:
       # HTTPS with Caddy's internal CA; HTTP stays (no redirect) for clients without its root
-      caddy: http://npi01, http://npi01.local, https://npi01, https://npi01.local
-      caddy.tls: internal
-      caddy.@outside: not remote_ip private_ranges 100.64.0.0/10
-      caddy.respond: "@outside 403"
-      caddy.reverse_proxy: "{{upstreams 3000}}"
+      # caddy_0, not caddy: genkan's global caddy.* labels would merge into it
+      caddy_0: http://npi01, http://npi01.local, http://192.168.100.23, https://npi01, https://npi01.local, https://192.168.100.23
+      caddy_0.tls: internal
+      caddy_0.@outside: not remote_ip private_ranges 100.64.0.0/10
+      caddy_0.respond: "@outside 403"
+      caddy_0.reverse_proxy: "{{upstreams 3000}}"
     networks: [default, genkan]
 volumes:
   denpa-data:
