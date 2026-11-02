@@ -48,6 +48,7 @@ services:
       TZ: Asia/Tokyo
       TRUSTED_NETWORKS: 192.168.0.0/16,10.0.0.0/8,100.64.0.0/10
       TRUSTED_PROXIES: 172.30.0.2
+      ALLOWED_HOSTS: npi01.tailce43f5.ts.net # login-free names besides IPs, npi01 and npi01.local
       ENCODE_CONCURRENCY: "1"
     # Rockchip MPP
     devices:

@@ -30,3 +30,9 @@ fi
 if ! tailscale status &>/dev/null; then
   sudo tailscale up --qr
 fi
+
+# Tailscale masquerades traffic it forwards from tailscale0, which includes Docker's DNAT to
+# genkan, so denpa would see 172.30.0.1 instead of the tailnet peer
+if [[ "$(tailscale debug prefs | jq .NoSNAT)" != true ]]; then
+  sudo tailscale set --snat-subnet-routes=false
+fi
