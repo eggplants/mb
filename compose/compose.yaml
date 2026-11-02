@@ -59,13 +59,18 @@ services:
       - /mnt/hdd1/denpa/raw:/media/raw
       - /mnt/hdd1/denpa/encoded:/media/encoded
     labels:
-      # HTTPS with Caddy's internal CA; HTTP stays (no redirect) for clients without its root
-      # caddy_0, not caddy: genkan's global caddy.* labels would merge into it
-      caddy_0: http://npi01, http://npi01.local, http://192.168.100.23, https://npi01, https://npi01.local, https://192.168.100.23
+      # HTTPS with Caddy's internal CA; HTTP stays (no redirect) for clients without its root.
+      # Separate blocks: genkan's default_sni adds TLS policies, which Caddy rejects on the :80 server.
+      # caddy_N, not caddy: genkan's global caddy.* labels would merge into it.
+      caddy_0: https://npi01, https://npi01.local, https://192.168.100.23
       caddy_0.tls: internal
       caddy_0.@outside: not remote_ip private_ranges 100.64.0.0/10
       caddy_0.respond: "@outside 403"
       caddy_0.reverse_proxy: "{{upstreams 3000}}"
+      caddy_1: http://npi01, http://npi01.local, http://192.168.100.23
+      caddy_1.@outside: not remote_ip private_ranges 100.64.0.0/10
+      caddy_1.respond: "@outside 403"
+      caddy_1.reverse_proxy: "{{upstreams 3000}}"
     networks: [default, genkan]
 volumes:
   denpa-data:
