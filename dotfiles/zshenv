@@ -45,3 +45,6 @@ fi
 # would otherwise append to this file)
 for _f in "$HOME"/.zshenv.d/*.zsh(N); do source "$_f"; done
 unset _f
+
+# Vite+ bin (https://viteplus.dev)
+. "/home/eggplants/.config/vite-plus/env"

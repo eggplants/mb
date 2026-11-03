@@ -116,3 +116,6 @@ fi
 # machine-local additions that do not belong in the repo
 for _f in "$HOME"/.zshrc.d/*.zsh(N); do source "$_f"; done
 unset _f
+
+# Vite+ bin (https://viteplus.dev)
+. "/home/eggplants/.config/vite-plus/env"
