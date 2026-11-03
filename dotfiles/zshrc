@@ -118,4 +118,4 @@ for _f in "$HOME"/.zshrc.d/*.zsh(N); do source "$_f"; done
 unset _f
 
 # Vite+ bin (https://viteplus.dev)
-. "/home/eggplants/.config/vite-plus/env"
+[[ ! -f "$HOME/.config/vite-plus/env" ]] || . "$HOME/.config/vite-plus/env"
