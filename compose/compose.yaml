@@ -23,7 +23,7 @@ services:
       # Global option: IP clients send no SNI, and after DNAT the local address is 172.30.0.2
       caddy.default_sni: 192.168.100.23
   tuner-agent:
-    image: ghcr.io/danything/denpa-agent:2.29.0@sha256:9e0d81a3e6da59f253a2e08951ff07e4085eac299936adc740ff91b4e898b3c6
+    image: ghcr.io/danything/denpa-agent:2.30.1@sha256:a20ade2bd324b6c29740c0b7bb63a1fcd236fba104f9b7a94a46434cf8a4a5f0
     restart: unless-stopped
     stop_grace_period: 6h5m
     cap_add:
@@ -42,7 +42,7 @@ services:
     ports:
       - "127.0.0.1:25252:25252"
   denpa:
-    image: ghcr.io/danything/denpa:2.29.0@sha256:61b48c0c105dc0fc5aae057c9f321a50bb043c4e6a74bf7235478f525a9aca0c
+    image: ghcr.io/danything/denpa:2.30.1@sha256:ca240bed792b729caf9de806c5163d420b78bff333d7e7d01caa5cdebca07e02
     restart: unless-stopped
     stop_grace_period: 6h5m
     depends_on:
