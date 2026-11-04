@@ -6,3 +6,5 @@
 miserc.local.toml
 miserc.local.toml.bak.*
 *.local.toml
+# denpa's pairing secret (written by the NanoPi's pre-packages hook)
+compose/.env

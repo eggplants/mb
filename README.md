@@ -101,7 +101,7 @@ On a new disk, open denpa, check the tuners and the card reader in Settings > Re
 
 - denpa: `http://npi01`, `http://npi01.local`, `http://npi01.home.arpa` (RTX830 static DNS) or `http://192.168.100.23`, or `https://npi01.<tailnet>.ts.net` (Let's Encrypt via Tailscale)
   - `https://npi01` (and the others) uses Caddy's internal CA: trust its root from `sudo docker exec denpa-genkan-1 cat /data/caddy/pki/authorities/local/root.crt > ~/root.crt`
-- Tuner agent: `curl -s localhost:25252/denpa/card | jq` on the NanoPi
+- Tuner agent: `sudo docker exec denpa-tuner-agent-1 denpa-agent --status | jq` on the NanoPi
 - Grafana: `http://npi01.<tailnet>.ts.net:3000`
 
 </details>

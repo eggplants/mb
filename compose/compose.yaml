@@ -23,7 +23,7 @@ services:
       # Global option: IP clients send no SNI, and after DNAT the local address is 172.30.0.2
       caddy.default_sni: 192.168.100.23
   tuner-agent:
-    image: ghcr.io/danything/denpa-agent:2.26.0@sha256:e6cfe0206770a1009015da42b16387c673ada68c7c6665875a753f40e65b3679
+    image: ghcr.io/danything/denpa-agent:2.29.0@sha256:9e0d81a3e6da59f253a2e08951ff07e4085eac299936adc740ff91b4e898b3c6
     restart: unless-stopped
     stop_grace_period: 6h5m
     cap_add:
@@ -31,6 +31,9 @@ services:
     device_cgroup_rules:
       - "c 189:* rmw"
       - "c 212:* rmw"
+    environment:
+      # compose/.env, written by the pre-packages hook in conf.d/nanopi
+      AGENT_PAIR_TOKEN: "${AGENT_PAIR_TOKEN:?compose/.env must set AGENT_PAIR_TOKEN}"
     volumes:
       - /mnt/hdd1/denpa/config:/config
       - /mnt/hdd1/denpa/raw:/media/raw
@@ -39,13 +42,14 @@ services:
     ports:
       - "127.0.0.1:25252:25252"
   denpa:
-    image: ghcr.io/danything/denpa:2.26.0@sha256:c9c64337da3a5d7e6d815dc10032fce69477af6287489f2a4c74a864fb921446
+    image: ghcr.io/danything/denpa:2.29.0@sha256:61b48c0c105dc0fc5aae057c9f321a50bb043c4e6a74bf7235478f525a9aca0c
     restart: unless-stopped
     stop_grace_period: 6h5m
     depends_on:
       - tuner-agent
     environment:
       TZ: Asia/Tokyo
+      TUNER_AGENT_URL: "https://tuner-agent:25252#pair=${AGENT_PAIR_TOKEN:?compose/.env must set AGENT_PAIR_TOKEN}"
       TRUSTED_NETWORKS: 192.168.0.0/16,10.0.0.0/8,100.64.0.0/10
       TRUSTED_PROXIES: 172.30.0.2
       ALLOWED_HOSTS: npi01.tailce43f5.ts.net # login-free names besides IPs, npi01 and npi01.local

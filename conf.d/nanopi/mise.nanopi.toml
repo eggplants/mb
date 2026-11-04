@@ -27,6 +27,13 @@ ripgrep = "latest"
 "apt:prometheus-node-exporter" = "latest"
 "apt:grafana-enterprise" = "latest"
 
+[bootstrap.hooks]
+# The secret denpa and its tuner agent pair with (compose/compose.yaml). A hook, as the setup:*
+# tasks run after compose; losing the file is harmless, as they pair again with a new one.
+pre-packages = """
+[ -s "$HOME/.config/mise/compose/.env" ] || (umask 077; echo "AGENT_PAIR_TOKEN=$(head -c 32 /dev/urandom | base64 | tr '+/' '-_' | tr -d '=\\n')" > "$HOME/.config/mise/compose/.env")
+"""
+
 # apt sources
 
 [bootstrap.files."/etc/apt/sources.list"]
