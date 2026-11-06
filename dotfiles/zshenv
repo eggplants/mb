@@ -26,6 +26,9 @@ fi
 
 export EDITOR=nano
 export PINACT_KEYRING_ENABLED=true
+# op decides on desktop app integration by reading 1Password's settings.json, but macOS denies
+# terminals access to its group container, so op falls back to `op signin`; skip that check.
+[[ $OSTYPE == darwin* ]] && export OP_BIOMETRIC_UNLOCK_ENABLED=true
 if [[ -n ${TERMUX_VERSION-} || $OSTYPE == *android* ]]; then
   export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk 2>/dev/null)"
 fi
