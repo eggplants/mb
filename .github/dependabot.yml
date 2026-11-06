@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://www.schemastore.org/dependabot-2.0.json
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  # Images in compose/compose.yaml.
+  # Not covered: the tools in .mise.toml and conf.d/ (Dependabot has no mise ecosystem).
+  - package-ecosystem: docker-compose
+    directory: /compose
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      docker:
+        patterns: ["*"]
