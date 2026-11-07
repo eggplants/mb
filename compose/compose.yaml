@@ -10,8 +10,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - caddy-data:/data
-      # Caddy gets *.ts.net certificates from tailscaled; the directory, as tailscaled recreates the socket
-      - /var/run/tailscale:/var/run/tailscale
     networks:
       genkan:
         ipv4_address: 172.30.0.2 # denpa's TRUSTED_PROXIES
@@ -52,7 +50,6 @@ services:
       TUNER_AGENT_URL: "https://tuner-agent:25252#pair=${AGENT_PAIR_TOKEN:?compose/.env must set AGENT_PAIR_TOKEN}"
       TRUSTED_NETWORKS: 192.168.0.0/16,10.0.0.0/8,100.64.0.0/10
       TRUSTED_PROXIES: 172.30.0.2
-      ALLOWED_HOSTS: npi01.tailce43f5.ts.net # login-free names besides IPs, npi01 and npi01.local
       ENCODE_CONCURRENCY: "1"
     # Rockchip MPP
     devices:
@@ -78,11 +75,6 @@ services:
       caddy_1.@outside: not remote_ip private_ranges 100.64.0.0/10
       caddy_1.respond: "@outside 403"
       caddy_1.reverse_proxy: "{{upstreams 3000}}"
-      # Let's Encrypt certificate from tailscaled; HTTP redirects to HTTPS
-      caddy_2: npi01.tailce43f5.ts.net
-      caddy_2.@outside: not remote_ip private_ranges 100.64.0.0/10
-      caddy_2.respond: "@outside 403"
-      caddy_2.reverse_proxy: "{{upstreams 3000}}"
     networks: [default, genkan]
 volumes:
   denpa-data:
