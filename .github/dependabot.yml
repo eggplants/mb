@@ -17,7 +17,7 @@ updates:
   - package-ecosystem: docker-compose
     directory: /compose
     schedule:
-      interval: monthly
+      interval: daily
     cooldown:
       default-days: 7
     groups:
