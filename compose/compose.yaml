@@ -1,7 +1,6 @@
 # https://github.com/danything/denpa/blob/main/compose.prod.yml, with the NanoPi's changes merged in.
 name: denpa
 services:
-  # genkan's proxy (https://github.com/danything/genkan/blob/main/compose.yml), without Arcane
   genkan:
     image: lucaslorentz/caddy-docker-proxy:2.13.1-alpine@sha256:3e6cf4a6382da0cd14108a69929d7f8cc59e9a59cae4c9795071fa392ffa8036
     restart: unless-stopped
@@ -18,7 +17,6 @@ services:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
     labels:
-      # Global option: IP clients send no SNI, and after DNAT the local address is 172.30.0.2
       caddy.default_sni: 192.168.100.23
   tuner-agent:
     image: ghcr.io/danything/denpa-agent:2.31.1@sha256:8f7af5479cdfc2a642f51b1fb12ca6f23c80e9874a7400d1a1a1cdb0ef1cf70f
@@ -30,7 +28,6 @@ services:
       - "c 189:* rmw"
       - "c 212:* rmw"
     environment:
-      # compose/.env, written by the pre-packages hook in conf.d/nanopi
       AGENT_PAIR_TOKEN: "${AGENT_PAIR_TOKEN:?compose/.env must set AGENT_PAIR_TOKEN}"
     volumes:
       - /mnt/hdd1/denpa/config:/config
@@ -51,7 +48,6 @@ services:
       TRUSTED_NETWORKS: 192.168.0.0/16,10.0.0.0/8,100.64.0.0/10
       TRUSTED_PROXIES: 172.30.0.2
       ENCODE_CONCURRENCY: "1"
-    # Rockchip MPP
     devices:
       - /dev/mpp_service:/dev/mpp_service
       - /dev/dma_heap:/dev/dma_heap
@@ -59,7 +55,7 @@ services:
       - apparmor=docker-denpa
       - systempaths=unconfined
     volumes:
-      - denpa-data:/data # denpa_denpa-data
+      - denpa-data:/data
       - /mnt/hdd1/denpa/raw:/media/raw
       - /mnt/hdd1/denpa/encoded:/media/encoded
     labels:
