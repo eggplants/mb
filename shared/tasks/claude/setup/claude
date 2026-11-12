@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Point Claude Code's statusLine at claude-statusbar and install user-scope plugins and MCP servers, also for mclaude"
+#MISE description="Point Claude Code's statusLine at claude-statusbar and install user-scope plugins, skills and MCP servers, also for mclaude"
 set -euo pipefail
 
 # user-scope plugin marketplaces (name=source) and plugins (name@marketplace)
@@ -25,6 +25,10 @@ plugins=(
 mcp_servers=(
   'trivy=trivy mcp'
 )
+# skills installed into ~/.claude/skills by gh skill (name=repo); update with `gh skill update`
+gh_skills=(
+  security-audit=cloudflare/security-audit-skill
+)
 
 # trivy MCP server plugin
 if command -v trivy &>/dev/null && ! trivy plugin info mcp &>/dev/null; then
@@ -48,6 +52,16 @@ if [[ "$(jq -c '.statusLine' "$dst" 2>/dev/null || :)" != "$line" ]]; then
   jq --argjson line "$line" '.statusLine = $line' "$dst" >"$tmp"
   mv "$tmp" "$dst"
 fi
+
+# gh skills, before they are linked into ~/.mclaude below
+for s in "${gh_skills[@]}"; do
+  [[ -e ~/.claude/skills/${s%%=*} ]] && continue
+  if gh auth status &>/dev/null; then
+    gh skill install "${s#*=}" "${s%%=*}" --agent claude-code --scope user
+  else
+    echo "setup:claude: skipping skill ${s%%=*}: run gh auth login first" >&2
+  fi
+done
 
 # ~/.claude skills and commands that tools install there (claude-statusbar etc.), linked into
 # ~/.mclaude; synced/ belongs to the logged-in account

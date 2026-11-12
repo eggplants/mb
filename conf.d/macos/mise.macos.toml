@@ -29,6 +29,8 @@ yq = "latest"
 "aqua:sibprogrammer/xq" = "latest"
 "pipx:claude-monitor" = "latest"
 "pipx:gw2aws" = "0.1.2"
+"npm:@nulab/bee" = "latest"
+"github:schpet/linear-cli" = "latest"
 
 # Casks installed by Homebrew count as installed; take over identical apps.
 [bootstrap.brew]
