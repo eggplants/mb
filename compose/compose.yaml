@@ -19,7 +19,7 @@ services:
     labels:
       caddy.default_sni: 192.168.100.23
   tuner-agent:
-    image: ghcr.io/danything/denpa-agent:2.42.0@sha256:bf24057ac4a82de628d50824fe3dfc1ae414a2e910e2b1a4407156cad2365398
+    image: ghcr.io/danything/denpa-agent:2.43.0@sha256:fde3ec77d344520ae288d77f79c535d7bc5d86bedcac7aa20ae366da23666b13
     restart: unless-stopped
     stop_grace_period: 6h5m
     cap_add:
@@ -37,7 +37,7 @@ services:
     ports:
       - "127.0.0.1:25252:25252"
   denpa:
-    image: ghcr.io/danything/denpa:2.42.0@sha256:fd1e5ac9abd30ae5aedd4669b8e5614c7a577a97efd8270d1d1b902da6510f5e
+    image: ghcr.io/danything/denpa:2.43.0@sha256:ccce5a8a891ab651fe637032b80762aa60ce744dbfd95477ee5fc5c99f3fd12a
     restart: unless-stopped
     stop_grace_period: 6h5m
     depends_on:
