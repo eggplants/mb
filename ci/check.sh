@@ -160,8 +160,9 @@ for sel in "${selections[@]}"; do
   if [[ "$sel" != linux,nanopi ]] && grep -qx 'hdd:init' <<<"$tasks"; then
     fail "[$sel] lists the NanoPi-only hdd:init task"
   fi
-  # from /: under $HOME, ~/.config/mise would be read as a (untrusted) project config
-  (cd / && MISE_CONFIG_DIR="$sb/preview" mise -E "$sel" bootstrap --dry-run --skip packages,tools,task,compose) \
+  # from /: under $HOME, ~/.config/mise would be read as a (untrusted) project config.
+  # firewall: planning it reads the host's nftables through sudo.
+  (cd / && MISE_CONFIG_DIR="$sb/preview" mise -E "$sel" bootstrap --dry-run --skip packages,tools,task,compose,firewall) \
     >/dev/null 2>"$sb/err" || fail "preview dry-run for [$sel] fails: $(tail -3 "$sb/err")"
 done
 post="$(sed -n 's/^depends_post = \[\(.*\)\]$/\1/p' "$repo/conf.d/desktop/mise.desktop.toml" | tr -d '"')"

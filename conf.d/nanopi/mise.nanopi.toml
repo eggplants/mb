@@ -26,6 +26,7 @@ ripgrep = "latest"
 "apt:prometheus" = "latest"
 "apt:prometheus-node-exporter" = "latest"
 "apt:grafana-enterprise" = "latest"
+"apt:nftables" = "latest"  # [bootstrap.linux.firewall]
 
 [bootstrap.hooks]
 # Arcane's encryption key (compose/arcane/compose.yaml). Losing it loses the secrets Arcane
@@ -177,6 +178,22 @@ enabled = true
 [bootstrap.services.grafana-server]
 state = "running"
 enabled = true
+
+# Grafana, Prometheus and Arcane are reached through genkan (compose/denpa) at
+# <name>.npi01.home.arpa, so their ports refuse everyone else, LAN and tailnet alike (the tailnet
+# resolves home.arpa by split DNS and reaches the LAN through a subnet router). Allows and
+# rejects apply in this order; anything else is allowed. Without genkan, use
+# `ssh -L 3552:localhost:3552 npi01.local` (loopback is always allowed).
+[bootstrap.linux.firewall]
+backend = "nftables"
+default_incoming = "allow"
+rules = [
+  { name = "genkan", source = "172.30.0.0/24" },
+  { name = "grafana", action = "reject", protocol = "tcp", port = 3000 },
+  { name = "prometheus", action = "reject", protocol = "tcp", port = 9090 },
+  { name = "node-exporter", action = "reject", protocol = "tcp", port = 9100 },
+  { name = "arcane", action = "reject", protocol = "tcp", port = 3552 },
+]
 
 # Arcane, which deploys denpa, its tuner agent and genkan's proxy (compose/denpa) by Git sync.
 # The files, directories and services above are denpa's host side and stay here.
