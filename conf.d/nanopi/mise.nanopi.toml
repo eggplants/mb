@@ -28,10 +28,10 @@ ripgrep = "latest"
 "apt:grafana-enterprise" = "latest"
 
 [bootstrap.hooks]
-# The secret denpa and its tuner agent pair with (compose/compose.yaml). A hook, as the setup:*
-# tasks run after compose; losing the file is harmless, as they pair again with a new one.
+# Arcane's encryption key (compose/arcane/compose.yaml). Losing it loses the secrets Arcane
+# stores (the denpa Git sync's AGENT_PAIR_TOKEN, Git credentials), so it is never rewritten.
 pre-packages = """
-[ -s "$HOME/.config/mise/compose/.env" ] || (umask 077; echo "AGENT_PAIR_TOKEN=$(head -c 32 /dev/urandom | base64 | tr '+/' '-_' | tr -d '=\\n')" > "$HOME/.config/mise/compose/.env")
+[ -s "$HOME/.config/mise/compose/arcane/.env" ] || (umask 077; echo "ARCANE_ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64 | tr '+/' '-_' | tr -d '=\\n')" > "$HOME/.config/mise/compose/arcane/.env")
 """
 
 # apt sources
@@ -112,7 +112,7 @@ ACTION=="add", SUBSYSTEM=="scsi", ENV{DEVTYPE}=="scsi_device", ATTRS{idVendor}==
   ATTR{timeout}="180"
 """
 
-# the denpa container's AppArmor profile (compose/compose.yaml)
+# the denpa container's AppArmor profile (compose/denpa/compose.yaml)
 [bootstrap.files."/etc/apparmor.d/docker-denpa"]
 source = "files/apparmor/docker-denpa"
 notify = ["apparmor"]
@@ -178,11 +178,13 @@ enabled = true
 state = "running"
 enabled = true
 
-# denpa, its tuner agent and genkan's proxy
+# Arcane, which deploys denpa, its tuner agent and genkan's proxy (compose/denpa) by Git sync.
+# The files, directories and services above are denpa's host side and stay here.
 
-[bootstrap.compose.denpa]
-project_dir = "{{ xdg_config_home }}/mise/compose"
-project_name = "denpa"
+[bootstrap.compose.arcane]
+project_dir = "{{ xdg_config_home }}/mise/compose/arcane"
+project_name = "arcane"
+pull = "missing"  # Arcane updates its own :latest image
 sudo = true  # the user may not be in the docker group yet
 depends_on = [
   "package:apt:docker-compose-plugin",

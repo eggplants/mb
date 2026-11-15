@@ -1,0 +1,31 @@
+# Arcane (https://getarcane.app/docs/get-started/installation): deploys compose/denpa by Git sync.
+# mise brings it up ([bootstrap.compose.arcane] in conf.d/nanopi) with pull = missing, so Arcane
+# updates its own :latest image (Updates → Update All) and mise leaves that image alone.
+name: arcane
+services:
+  arcane:
+    image: ghcr.io/getarcaneapp/manager:latest
+    container_name: arcane
+    restart: unless-stopped
+    cgroup: host
+    environment:
+      ARCANE_APP_URL: http://npi01:3552
+      # Encrypts the stored secrets (Git credentials, the Git sync's AGENT_PAIR_TOKEN); losing it
+      # loses them. Written once by the NanoPi's pre-packages hook.
+      ARCANE_ENCRYPTION_KEY: "${ARCANE_ENCRYPTION_KEY:?compose/arcane/.env must set ARCANE_ENCRYPTION_KEY}"
+      # Projects (the Git sync's checkout) stay in arcane-data, at /app/data/projects; denpa
+      # uses only absolute bind mounts and named volumes, so no host path is needed.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - arcane-data:/app/data
+    ports:
+      # IPv4 only; LAN and Tailscale (Arcane has the Docker socket, so never forward this port)
+      - "0.0.0.0:3552:3552"
+    healthcheck:
+      test: ["CMD", "./arcane", "health", "--timeout", "2s"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+volumes:
+  arcane-data:

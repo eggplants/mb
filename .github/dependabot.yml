@@ -12,10 +12,10 @@ updates:
       github-actions:
         patterns: ["*"]
 
-  # Images in compose/compose.yaml.
+  # Images in compose/denpa/compose.yaml (compose/arcane uses :latest and updates itself).
   # Not covered: the tools in .mise.toml and conf.d/ (Dependabot has no mise ecosystem).
   - package-ecosystem: docker-compose
-    directory: /compose
+    directory: /compose/denpa
     schedule:
       interval: daily
     cooldown:

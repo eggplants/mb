@@ -1,4 +1,6 @@
 # https://github.com/danything/denpa/blob/main/compose.prod.yml, with the NanoPi's changes merged in.
+# Deployed by Arcane's Git sync (compose/arcane), not by mise: a push to main reaches npi01 on the
+# next sync. Image updates come from Dependabot, so every service opts out of Arcane's updater.
 name: denpa
 services:
   genkan:
@@ -17,6 +19,7 @@ services:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
     labels:
+      com.getarcaneapp.arcane.updater: "false"
       caddy.default_sni: 192.168.100.23
   tuner-agent:
     image: ghcr.io/danything/denpa-agent:2.43.0@sha256:fde3ec77d344520ae288d77f79c535d7bc5d86bedcac7aa20ae366da23666b13
@@ -28,7 +31,7 @@ services:
       - "c 189:* rmw"
       - "c 212:* rmw"
     environment:
-      AGENT_PAIR_TOKEN: "${AGENT_PAIR_TOKEN:?compose/.env must set AGENT_PAIR_TOKEN}"
+      AGENT_PAIR_TOKEN: "${AGENT_PAIR_TOKEN:?set AGENT_PAIR_TOKEN in the Git sync's Environment Variables in Arcane}"
     volumes:
       - /mnt/hdd1/denpa/config:/config
       - /mnt/hdd1/denpa/raw:/media/raw
@@ -36,6 +39,8 @@ services:
       - /dev/dvb:/dev/dvb
     ports:
       - "127.0.0.1:25252:25252"
+    labels:
+      com.getarcaneapp.arcane.updater: "false"
   denpa:
     image: ghcr.io/danything/denpa:2.43.0@sha256:ccce5a8a891ab651fe637032b80762aa60ce744dbfd95477ee5fc5c99f3fd12a
     restart: unless-stopped
@@ -44,7 +49,7 @@ services:
       - tuner-agent
     environment:
       TZ: Asia/Tokyo
-      TUNER_AGENT_URL: "https://tuner-agent:25252#pair=${AGENT_PAIR_TOKEN:?compose/.env must set AGENT_PAIR_TOKEN}"
+      TUNER_AGENT_URL: "https://tuner-agent:25252#pair=${AGENT_PAIR_TOKEN:?set AGENT_PAIR_TOKEN in the Git sync's Environment Variables in Arcane}"
       TRUSTED_NETWORKS: 192.168.0.0/16,10.0.0.0/8,100.64.0.0/10
       TRUSTED_PROXIES: 172.30.0.2
       ENCODE_CONCURRENCY: "1"
@@ -59,6 +64,7 @@ services:
       - /mnt/hdd1/denpa/raw:/media/raw
       - /mnt/hdd1/denpa/encoded:/media/encoded
     labels:
+      com.getarcaneapp.arcane.updater: "false"
       # HTTPS with Caddy's internal CA; HTTP stays (no redirect) for clients without its root.
       # Separate blocks: genkan's default_sni adds TLS policies, which Caddy rejects on the :80 server.
       # caddy_N, not caddy: genkan's global caddy.* labels would merge into it.
