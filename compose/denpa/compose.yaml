@@ -22,7 +22,7 @@ services:
       com.getarcaneapp.arcane.updater: "false"
       caddy.default_sni: 192.168.100.23
   tuner-agent:
-    image: ghcr.io/danything/denpa-agent:2.43.0@sha256:fde3ec77d344520ae288d77f79c535d7bc5d86bedcac7aa20ae366da23666b13
+    image: ghcr.io/danything/denpa-agent:2.49.0@sha256:f3fd138475dd56a29d37dfa4df523c8d0490c549b19c618137370a68776996e2
     restart: unless-stopped
     stop_grace_period: 6h5m
     cap_add:
@@ -42,7 +42,7 @@ services:
     labels:
       com.getarcaneapp.arcane.updater: "false"
   denpa:
-    image: ghcr.io/danything/denpa:2.43.0@sha256:ccce5a8a891ab651fe637032b80762aa60ce744dbfd95477ee5fc5c99f3fd12a
+    image: ghcr.io/danything/denpa:2.49.0@sha256:7f62dc3bfd2b05ad3dea2a850350f40b91e71528e962bf33d296c43057bd3169
     restart: unless-stopped
     stop_grace_period: 6h5m
     depends_on:
