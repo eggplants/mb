@@ -21,6 +21,18 @@ services:
     labels:
       com.getarcaneapp.arcane.updater: "false"
       caddy.default_sni: 192.168.100.23
+      # Grafana (apt) and Arcane (compose/arcane) on the host, reached through genkan's gateway.
+      # Their own ports (3000, 3552) stay open as a fallback while Arcane redeploys this project.
+      caddy_2: https://grafana.npi01.home.arpa
+      caddy_2.tls: internal
+      caddy_2.@outside: not remote_ip private_ranges 100.64.0.0/10
+      caddy_2.respond: "@outside 403"
+      caddy_2.reverse_proxy: 172.30.0.1:3000
+      caddy_3: https://arcane.npi01.home.arpa
+      caddy_3.tls: internal
+      caddy_3.@outside: not remote_ip private_ranges 100.64.0.0/10
+      caddy_3.respond: "@outside 403"
+      caddy_3.reverse_proxy: 172.30.0.1:3552
   tuner-agent:
     image: ghcr.io/danything/denpa-agent:2.49.0@sha256:f3fd138475dd56a29d37dfa4df523c8d0490c549b19c618137370a68776996e2
     restart: unless-stopped
