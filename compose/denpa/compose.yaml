@@ -34,7 +34,7 @@ services:
       caddy_4.respond: "@outside 403"
       caddy_4.reverse_proxy: 172.30.0.1:9090
   tuner-agent:
-    image: ghcr.io/danything/denpa-agent:2.51.0@sha256:dd2761e95ec472dda114bc5bfb6e4e13dd21ce679b3df91723417e8bc8d000ef
+    image: ghcr.io/danything/denpa-agent:2.52.0@sha256:64b43722bbc4b4cfb51ad41ab519c2b67265a1b6fc43d8095bda77b3d5bea7d0
     restart: unless-stopped
     stop_grace_period: 6h5m
     cap_add:
@@ -54,7 +54,7 @@ services:
     labels:
       com.getarcaneapp.arcane.updater: "false"
   denpa:
-    image: ghcr.io/danything/denpa:2.51.0@sha256:fb2e4a867d29cec5d16cfbbbea91f559ca92e625db493fcceed893d21662be06
+    image: ghcr.io/danything/denpa:2.52.0@sha256:cc007044b110d3b7592de1c77d99b039e639b29c0cbb36104fd7fab082ed65dd
     restart: unless-stopped
     stop_grace_period: 6h5m
     depends_on:
