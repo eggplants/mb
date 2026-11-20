@@ -38,21 +38,32 @@ pre-packages = """
 
 # apt sources
 
+# The image's one-line sources.list, replaced by debian.sources below
+[bootstrap.files."/etc/apt/sources.list"]
+state = "absent"
+phase = "pre-packages"
+
 # The suite follows /etc/os-release, so a release upgrade (sed to the new codename, then
 # full-upgrade) is not reverted by the next bootstrap. os = "linux": exec() must never render
-# on another OS (plan there would fail).
-[bootstrap.files."/etc/apt/sources.list"]
+# on another OS (plan there would fail). The .gpg keyring is a file on bookworm and a symlink
+# to .pgp on trixie.
+[bootstrap.files."/etc/apt/sources.list.d/debian.sources"]
 os = "linux"
 template = true
 phase = "pre-packages"
 content = """
 {% set c = exec(command=". /etc/os-release && echo $VERSION_CODENAME") -%}
-deb http://ftp.jp.debian.org/debian {{ c }} main contrib non-free
-deb-src http://ftp.jp.debian.org/debian {{ c }} main contrib non-free
-deb http://security.debian.org/debian-security {{ c }}-security main contrib non-free
-deb-src http://security.debian.org/debian-security {{ c }}-security main contrib non-free
-deb http://ftp.jp.debian.org/debian {{ c }}-updates main contrib non-free
-deb-src http://ftp.jp.debian.org/debian {{ c }}-updates main contrib non-free
+Types: deb deb-src
+URIs: http://ftp.jp.debian.org/debian
+Suites: {{ c }} {{ c }}-updates
+Components: main contrib non-free
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Types: deb deb-src
+URIs: http://security.debian.org/debian-security
+Suites: {{ c }}-security
+Components: main contrib non-free
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 """
 
 # Written by the Tailscale install script / the old manual setup; replaced by the .sources
