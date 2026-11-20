@@ -30,7 +30,7 @@ phase = "pre-packages"
 source = "files/apt/docker.asc"  # conf.d/linux/files/apt/docker.asc
 phase = "pre-packages"
 
-# One template for Ubuntu (ubuntu, <codename>, amd64) and the NanoPi (debian, bookworm, arm64).
+# One template for Ubuntu (ubuntu, <codename>, amd64) and the NanoPi (debian, <codename>, arm64).
 # os = "linux": exec() below must never render on another OS (plan there would fail).
 [bootstrap.files."/etc/apt/sources.list.d/docker.sources"]
 os = "linux"

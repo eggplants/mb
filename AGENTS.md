@@ -2,7 +2,7 @@
 
 ## What this repo is
 
-The global [mise](https://mise.jdx.dev) config (`mise bootstrap`) for five kinds of machine: macOS (Apple Silicon), Termux, Ubuntu (Desktop or headless), a NanoPi R6S TV server (Debian 12, aarch64) and Windows (PowerShell 7). Every machine clones it as `~/.config/mise`. It replaces the archived setup-macos.sh, setup-termux.sh, setup-ubuntu.sh, setup-nanopi and SetupWindows.ps1 repos.
+The global [mise](https://mise.jdx.dev) config (`mise bootstrap`) for five kinds of machine: macOS (Apple Silicon), Termux, Ubuntu (Desktop or headless), a NanoPi R6S TV server (Debian 13, aarch64) and Windows (PowerShell 7). Every machine clones it as `~/.config/mise`. It replaces the archived setup-macos.sh, setup-termux.sh, setup-ubuntu.sh, setup-nanopi and SetupWindows.ps1 repos.
 
 ## Commands
 

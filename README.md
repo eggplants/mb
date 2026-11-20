@@ -75,7 +75,7 @@ In PowerShell, as yourself (not as Administrator):
 
 - Machine: [NanoPi R6S](https://www.friendlyelec.com/index.php?route=product/product&product_id=289)
 - Tuner: [PX-W3U4](https://plex-net.co.jp/itemreco/px-w3u4/) (driven over libusb by [denpa](https://github.com/danything/denpa); `px4_drv` is blacklisted)
-- OS: [rk3568-sd-debian-bookworm-core-6.1-arm64-20250811.img](https://drive.google.com/file/d/1hA3pUcZzdfSN1htq-3Nxn5ECr0EA1sa6/view?usp=drive_link) (Debian 12 / Linux 6.1, aarch64)
+- OS: Debian 13 trixie with the FriendlyELEC kernel
 
 Connect a display and keyboard, log in as `pi`, and create your user:
 

@@ -1,4 +1,4 @@
-# NanoPi R6S TV server (Debian 12 bookworm, arm64). Loads after conf.d/linux (apt base,
+# NanoPi R6S TV server (Debian 13 trixie, arm64). Loads after conf.d/linux (apt base,
 # Docker repository key, login shell).
 
 [settings]
