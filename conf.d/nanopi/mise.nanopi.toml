@@ -37,15 +37,21 @@ pre-packages = """
 
 # apt sources
 
+# The suite follows /etc/os-release, so a release upgrade (sed to the new codename, then
+# full-upgrade) is not reverted by the next bootstrap. os = "linux": exec() must never render
+# on another OS (plan there would fail).
 [bootstrap.files."/etc/apt/sources.list"]
+os = "linux"
+template = true
 phase = "pre-packages"
 content = """
-deb http://ftp.jp.debian.org/debian bookworm main contrib non-free
-deb-src http://ftp.jp.debian.org/debian bookworm main contrib non-free
-deb http://security.debian.org/debian-security bookworm-security main contrib non-free
-deb-src http://security.debian.org/debian-security bookworm-security main contrib non-free
-deb http://ftp.jp.debian.org/debian bookworm-updates main contrib non-free
-deb-src http://ftp.jp.debian.org/debian bookworm-updates main contrib non-free
+{% set c = exec(command=". /etc/os-release && echo $VERSION_CODENAME") -%}
+deb http://ftp.jp.debian.org/debian {{ c }} main contrib non-free
+deb-src http://ftp.jp.debian.org/debian {{ c }} main contrib non-free
+deb http://security.debian.org/debian-security {{ c }}-security main contrib non-free
+deb-src http://security.debian.org/debian-security {{ c }}-security main contrib non-free
+deb http://ftp.jp.debian.org/debian {{ c }}-updates main contrib non-free
+deb-src http://ftp.jp.debian.org/debian {{ c }}-updates main contrib non-free
 """
 
 # Written by the Tailscale install script / the old manual setup; replaced by the .sources
@@ -63,11 +69,13 @@ source = "files/apt/tailscale.asc"
 phase = "pre-packages"
 
 [bootstrap.files."/etc/apt/sources.list.d/tailscale.sources"]
+os = "linux"
+template = true
 phase = "pre-packages"
 content = """
 Types: deb
 URIs: https://pkgs.tailscale.com/stable/debian
-Suites: bookworm
+Suites: {{ exec(command=". /etc/os-release && echo $VERSION_CODENAME") }}
 Components: main
 Architectures: arm64
 Signed-By: /etc/apt/keyrings/tailscale.asc
