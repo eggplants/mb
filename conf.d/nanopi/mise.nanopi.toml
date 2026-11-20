@@ -27,6 +27,7 @@ ripgrep = "latest"
 "apt:prometheus-node-exporter" = "latest"
 "apt:grafana-enterprise" = "latest"
 "apt:nftables" = "latest"  # [bootstrap.linux.firewall]
+"apt:ntpsec" = "latest"  # time sync (the image had it only as a dependency of ntp)
 
 [bootstrap.hooks]
 # Arcane's encryption key (compose/arcane/compose.yaml). Losing it loses the secrets Arcane
