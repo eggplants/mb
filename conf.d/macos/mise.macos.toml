@@ -97,6 +97,7 @@ adopt = true
 "brew-cask:google-chrome" = "latest"
 "brew-cask:notion" = "latest"
 "brew-cask:openai/tools/openai" = "latest"
+"brew-cask:open-webui" = "latest"
 "brew-cask:pgadmin4" = "latest"
 "brew-cask:raspberry-pi-imager" = "latest"
 "brew-cask:rectangle" = "latest"
