@@ -104,7 +104,8 @@ en_US.UTF-8 UTF-8
 ja_JP.UTF-8 UTF-8
 """
 
-[bootstrap.files."/etc/default/locale"]
+# Debian 13 makes /etc/default/locale a symlink to it
+[bootstrap.files."/etc/locale.conf"]
 content = "LANG=en_US.UTF-8\n"
 
 [bootstrap.files."/etc/ssh/sshd_config.d/10-no-password.conf"]

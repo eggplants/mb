@@ -22,7 +22,7 @@ if [[ "$(timedatectl show -p Timezone --value)" != Asia/Tokyo ]]; then
   sudo timedatectl set-timezone Asia/Tokyo
 fi
 
-# /etc/locale.gen and /etc/default/locale are written by [bootstrap.files]
+# /etc/locale.gen and /etc/locale.conf are written by [bootstrap.files]
 if ! locale -a | grep -qx en_US.utf8 || ! locale -a | grep -qx ja_JP.utf8; then
   sudo locale-gen
 fi
