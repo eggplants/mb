@@ -2,6 +2,7 @@
 #MISE description="Point Claude Code's statusLine at claude-statusbar and install user-scope plugins, skills and MCP servers, also for mclaude"
 set -euo pipefail
 
+# Windows has a twin, conf.d/windows/tasks/setup/claude.ps1: keep the lists below in step with it.
 # user-scope plugin marketplaces (name=source) and plugins (name@marketplace)
 marketplaces=(
   agent-plugins-for-eggplants=eggplants/agent-plugins

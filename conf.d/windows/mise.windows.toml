@@ -15,7 +15,9 @@ ripgrep = "latest"
 "winget:JanDeDobbeleer.OhMyPosh" = "latest"
 "winget:Microsoft.WindowsTerminal" = "latest"
 # development
+"winget:Anthropic.ClaudeCode" = "latest"
 "winget:Docker.DockerDesktop" = "latest"
+"winget:GitHub.cli" = "latest"
 "winget:Microsoft.VisualStudio.2022.Community" = "latest"
 "winget:Microsoft.VisualStudioCode" = "latest"
 "winget:Microsoft.WingetCreate" = "latest"
@@ -58,7 +60,7 @@ ripgrep = "latest"
 [tasks.bootstrap]
 description = "Run imperative setup steps after the declarative bootstrap"
 depends = ["host:check"]
-run = [{ task = "setup:pwsh" }, { task = "setup:nano" }]
+run = [{ task = "setup:pwsh" }, { task = "setup:nano" }, { task = "setup:gpg" }, { task = "setup:git" }, { task = "setup:claude" }]
 
 [task_config]
 includes = ["tasks"]
