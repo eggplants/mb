@@ -17,5 +17,6 @@ trivy = "latest"
 yt-dlp = "latest"
 "aqua:azu/dockerfile-pin" = "latest"
 "github:eggplants/dev-null-tui" = "latest"
-"pipx:claude-statusbar" = "latest"
+# https://github.com/leeguooooo/claude-code-usage-bar/issues/83
+"pipx:claude-statusbar" = "3.53.1"
 "pipx:internetarchive" = "latest"

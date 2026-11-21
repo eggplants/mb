@@ -11,7 +11,8 @@ write_targets.dotfiles = "~/.config/mise/conf.d/termux/mise.termux.toml"
 "go:github.com/azu/dockerfile-pin" = "latest"
 # the prebuilt linux binary resolves DNS via /etc/resolv.conf, which Android lacks
 "go:github.com/eggplants/dev-null-tui/cmd/dn" = "latest"
-"pipx:claude-statusbar" = "latest"
+# https://github.com/leeguooooo/claude-code-usage-bar/issues/83
+"pipx:claude-statusbar" = "3.53.1"
 
 # "pkg:" is the Termux package manager plugin in plugins/pkg (repo root), linked by bootstrap.sh
 [bootstrap.packages]
