@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Import the GPG secret key from ~/.sec.key, enable the GPG SSH agent and init pass"
+# Windows has a twin, conf.d/windows/tasks/setup/gpg.ps1.
 #MISE raw=true
 set -euo pipefail
 

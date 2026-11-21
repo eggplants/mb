@@ -61,7 +61,7 @@ ripgrep = "latest"
 [tasks.bootstrap]
 description = "Run imperative setup steps after the declarative bootstrap"
 depends = ["host:check"]
-run = [{ task = "setup:pwsh" }, { task = "setup:nano" }, { task = "setup:git" }, { task = "setup:claude" }]
+run = [{ task = "setup:pwsh" }, { task = "setup:nano" }, { task = "setup:gpg" }, { task = "setup:git" }, { task = "setup:claude" }]
 
 [task_config]
 includes = ["tasks"]

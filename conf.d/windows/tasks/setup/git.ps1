@@ -22,15 +22,16 @@ if ($LASTEXITCODE) {
   }
 }
 
-$gpg = Get-Command gpg -ErrorAction SilentlyContinue
-$secret = if ($gpg) { & gpg --list-secret-keys --with-colons 2>$null } else { @() }
+# Git for Windows' own gpg (see setup:gpg), not one on PATH
+$gpg = Join-Path (Split-Path (Split-Path (Get-Command git).Source)) 'usr\bin\gpg.exe'
+$secret = if (Test-Path $gpg) { & $gpg --list-secret-keys --with-colons 2>$null } else { @() }
 if ($secret -match '^sec:') {
   # fingerprint of the last secret key, and the email of the first uid
   $key = (($secret -split "`n") | Select-String '^fpr:' | Select-Object -Last 1).Line.Split(':')[9]
-  $uid = ((& gpg --list-keys --with-colons) | Select-String '^uid:' | Select-Object -First 1).Line.Split(':')[9]
+  $uid = ((& $gpg --list-keys --with-colons) | Select-String '^uid:' | Select-Object -First 1).Line.Split(':')[9]
   Set-LocalGitConfig user.signingkey $key
   Set-LocalGitConfig user.email ([regex]::Match($uid, '<(.*)>').Groups[1].Value)
-  Set-LocalGitConfig gpg.program $gpg.Source
+  Set-LocalGitConfig gpg.program $gpg
   Set-LocalGitConfig commit.gpgSign true
   Set-LocalGitConfig tag.gpgSign true
 } else {
