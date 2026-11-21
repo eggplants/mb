@@ -2,6 +2,7 @@
 # Docker repository key, login shell).
 
 [settings]
+minimum_release_age = "7d"
 write_targets.tools = "~/.config/mise/conf.d/nanopi/mise.nanopi.toml"
 write_targets.packages = "~/.config/mise/conf.d/nanopi/mise.nanopi.toml"
 write_targets.dotfiles = "~/.config/mise/conf.d/nanopi/mise.nanopi.toml"

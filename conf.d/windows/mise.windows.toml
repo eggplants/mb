@@ -1,4 +1,5 @@
 [settings]
+minimum_release_age = "7d"
 write_targets.tools = "~/.config/mise/conf.d/windows/mise.windows.toml"
 write_targets.packages = "~/.config/mise/conf.d/windows/mise.windows.toml"
 write_targets.dotfiles = "~/.config/mise/conf.d/windows/mise.windows.toml"

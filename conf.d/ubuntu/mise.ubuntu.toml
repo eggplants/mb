@@ -5,6 +5,7 @@
 include = ["../../shared/workstation-tools.toml"]
 
 [settings]
+minimum_release_age = "7d"
 ruby.compile = false
 # `mise use -g`, `mise bootstrap packages use -g` and `mise dot add` write here, not into config.toml
 write_targets.tools = "~/.config/mise/conf.d/ubuntu/mise.ubuntu.toml"

@@ -1,4 +1,5 @@
 [settings]
+minimum_release_age = "7d"
 cargo.binstall = false
 use_file_shell_for_executable_tasks = true
 write_targets.tools = "~/.config/mise/conf.d/termux/mise.termux.toml"

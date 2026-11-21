@@ -123,7 +123,7 @@ for sel in "${selections[@]}"; do
 done
 
 # 7. mise, in a throwaway HOME: every selection loads exactly its modules, has a platform
-#    bootstrap task that runs host:check first, and dry-runs cleanly in a preview copy whose
+#    bootstrap task that runs host:check first, sets minimum_release_age, and dry-runs cleanly in a preview copy whose
 #    guard has no host test; the guard rejects bad selections, and the real guard accepts
 #    only this host's own selections.
 command -v mise >/dev/null || {
@@ -156,6 +156,8 @@ for sel in "${selections[@]}"; do
   info="$(mise -E "$sel" tasks info bootstrap 2>&1 || true)"
   grep -q 'conf.d/' <<<"$info" || fail "[$sel] has no platform bootstrap task"
   grep -q 'Depends on: host:check' <<<"$info" || fail "[$sel] bootstrap task does not depend on host:check"
+  age="$(mise -E "$sel" settings get minimum_release_age 2>/dev/null || true)"
+  [[ "$age" == 7d ]] || fail "[$sel] has minimum_release_age [$age], expected [7d]"
   tasks="$(mise -E "$sel" tasks ls 2>/dev/null | awk '{print $1}')"
   if [[ "$sel" != linux,nanopi ]] && grep -qx 'hdd:init' <<<"$tasks"; then
     fail "[$sel] lists the NanoPi-only hdd:init task"
