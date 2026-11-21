@@ -1,3 +1,5 @@
+min_version = "2026.10.7"
+
 [bootstrap.files."~/.local/state/mise-bootstrap/guard"]
 os = "unix"
 source = "guard.tera"
