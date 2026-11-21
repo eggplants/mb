@@ -1,6 +1,6 @@
-#MISE description="Install Claude Code's user-scope plugins, skills and MCP servers"
+#MISE description="Point Claude Code's statusLine at claude-statusbar and install user-scope plugins, skills and MCP servers"
 # Windows twin of shared/tasks/claude/setup/claude (bash): keep the lists below in step with it.
-# There is no mclaude or claude-statusbar on Windows, so only the default config dir is set up.
+# There is no mclaude on Windows, so only the default config dir is set up.
 $ErrorActionPreference = 'Stop'
 
 # user-scope plugin marketplaces (name=source) and plugins (name@marketplace)
@@ -54,6 +54,20 @@ if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
 if (Get-Command trivy -ErrorAction SilentlyContinue) {
   & trivy plugin info mcp *> $null
   if ($LASTEXITCODE) { & trivy plugin install mcp }
+}
+
+# claude-statusbar: run its setup unless statusLine already runs an installed cs or claude-statusbar
+# (cs --setup writes an absolute forward-slash path, quoted if it has spaces, followed by "render")
+$settings = Join-Path $HOME '.claude\settings.json'
+$cmd = if (Test-Path $settings) { [string](Get-Content -Raw $settings | ConvertFrom-Json).statusLine.command } else { '' }
+$exe = if ($cmd -match '^\s*"([^"]+)"') { $Matches[1] } elseif ($cmd -match '^\s*(\S+)') { $Matches[1] } else { '' }
+if ([IO.Path]::GetFileNameWithoutExtension($exe) -notin 'cs', 'claude-statusbar' -or
+  -not (Get-Command $exe -ErrorAction SilentlyContinue)) {
+  & claude-statusbar --setup
+  if ($LASTEXITCODE) {
+    $failed += 'claude-statusbar --setup'
+    Write-Warning 'setup:claude: claude-statusbar --setup failed'
+  }
 }
 
 # gh skills

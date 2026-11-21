@@ -6,6 +6,10 @@ write_targets.dotfiles = "~/.config/mise/conf.d/windows/mise.windows.toml"
 [tools]
 ripgrep = "latest"
 "aqua:azu/dockerfile-pin" = "latest"
+# uv is the backend for pipx: tools
+uv = "latest"
+# https://github.com/leeguooooo/claude-code-usage-bar/issues/83
+"pipx:claude-statusbar" = "3.53.1"
 
 [bootstrap.packages]
 "winget:Git.Git" = "latest"
