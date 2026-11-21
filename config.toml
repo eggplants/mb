@@ -21,9 +21,9 @@ bash = true
 "~/.zshenv" = { source = "dotfiles/zshenv" }
 "~/.zshrc" = { source = "dotfiles/zshrc" }
 "~/.nanorc" = { source = "dotfiles/nanorc" }
-"~/.gitconfig" = { source = "dotfiles/gitconfig", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
-"~/.claude/skills/cognitive-rhythm-writing/SKILL.md" = { source = "dotfiles/claude/skills/cognitive-rhythm-writing/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
-"~/.claude/skills/japanese-tech-writing/SKILL.md" = { source = "dotfiles/claude/skills/japanese-tech-writing/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
+"~/.gitconfig" = { source = "dotfiles/gitconfig", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }, { profile = "windows" }] }
+"~/.claude/skills/cognitive-rhythm-writing/SKILL.md" = { source = "dotfiles/claude/skills/cognitive-rhythm-writing/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }, { profile = "windows" }] }
+"~/.claude/skills/japanese-tech-writing/SKILL.md" = { source = "dotfiles/claude/skills/japanese-tech-writing/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }, { profile = "windows" }] }
 
 [dotfiles."~/.local/state/mise-bootstrap/dotfiles-guard"]
 source = "guard.tera"

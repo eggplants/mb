@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Write user.email/signingkey and gpg.program to ~/.gitconfig.local and log in to gh"
+# Windows has a twin, conf.d/windows/tasks/setup/git.ps1.
 #MISE raw=true
 set -euo pipefail
 
