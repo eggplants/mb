@@ -37,7 +37,6 @@ ripgrep = "latest"
 "winget:Microsoft.VCRedist.2015+.x86" = "latest"
 "winget:Nvidia.PhysX" = "latest"
 # apps
-"winget:Amazon.Kindle" = "latest"
 "winget:CometNetwork.BitComet" = "latest"
 "winget:CrystalDewWorld.CrystalDiskInfo" = "latest"
 "winget:Google.Chrome" = "latest"
@@ -55,6 +54,7 @@ ripgrep = "latest"
 "winget:yt-dlp.FFmpeg" = "latest"
 "winget:yt-dlp.yt-dlp" = "latest"
 # Microsoft Store (msstore source)
+"winget:9P8JQ0JJSTLL" = "latest"  # Kindle
 "winget:XPDM1ZW6815MQM" = "latest"  # VLC
 
 # no zsh on Windows; the bash block stays for Git Bash (and Claude Code's Bash tool)
