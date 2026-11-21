@@ -22,7 +22,8 @@ bash = true
 "~/.zshrc" = { source = "dotfiles/zshrc" }
 "~/.nanorc" = { source = "dotfiles/nanorc" }
 "~/.gitconfig" = { source = "dotfiles/gitconfig", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
-"~/.claude/skills/commit/SKILL.md" = { source = "dotfiles/claude/skills/commit/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
+"~/.claude/skills/cognitive-rhythm-writing/SKILL.md" = { source = "dotfiles/claude/skills/cognitive-rhythm-writing/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
+"~/.claude/skills/japanese-tech-writing/SKILL.md" = { source = "dotfiles/claude/skills/japanese-tech-writing/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }] }
 
 [dotfiles."~/.local/state/mise-bootstrap/dotfiles-guard"]
 source = "guard.tera"

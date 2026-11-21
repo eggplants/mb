@@ -4,6 +4,7 @@ set -euo pipefail
 
 # user-scope plugin marketplaces (name=source) and plugins (name@marketplace)
 marketplaces=(
+  agent-plugins-for-eggplants=eggplants/agent-plugins
   claude-community=anthropics/claude-plugins-community
   claude-plugins-official=anthropics/claude-plugins-official
   cursor-plugins=cursor/plugins
@@ -14,12 +15,16 @@ marketplaces=(
 )
 plugins=(
   claude-security@claude-plugins-official
+  commit@agent-plugins-for-eggplants
+  copilot-review@agent-plugins-for-eggplants
   eli5@claude-community
   humanize-writing@humanize-writing-skill
   modern-web-guidance@googlechrome
   natural-japanese@natural-japanese
   pstack@cursor-plugins
   yomiyasu@yomiyasu
+  # after eli5 and yomiyasu, its dependencies, so that they are not installed twice
+  japanese-oss-handbook@agent-plugins-for-eggplants
 )
 # user-scope MCP servers (name=command), added only when the command is installed
 mcp_servers=(
@@ -52,6 +57,14 @@ if [[ "$(jq -c '.statusLine' "$dst" 2>/dev/null || :)" != "$line" ]]; then
   jq --argjson line "$line" '.statusLine = $line' "$dst" >"$tmp"
   mv "$tmp" "$dst"
 fi
+
+# skills that were dotfiles and are now plugins (e.g. commit): mise leaves their links behind
+for f in ~/.claude/skills/*/SKILL.md; do
+  if [[ -L $f && ! -e $f && "$(readlink "$f")" == ~/.config/mise/dotfiles/* ]]; then
+    rm "$f"
+    rmdir "${f%/*}" 2>/dev/null || :
+  fi
+done
 
 # gh skills, before they are linked into ~/.mclaude below
 for s in "${gh_skills[@]}"; do
