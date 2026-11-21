@@ -57,6 +57,10 @@ ripgrep = "latest"
 # Microsoft Store (msstore source)
 "winget:XPDM1ZW6815MQM" = "latest"  # VLC
 
+# no zsh on Windows; the bash block stays for Git Bash (and Claude Code's Bash tool)
+[bootstrap.mise_shell_activate]
+zsh = false
+
 [tasks.bootstrap]
 description = "Run imperative setup steps after the declarative bootstrap"
 depends = ["host:check"]

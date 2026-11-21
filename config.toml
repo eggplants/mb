@@ -20,8 +20,8 @@ zsh = true
 bash = true
 
 [dotfiles]
-"~/.zshenv" = { source = "dotfiles/zshenv" }
-"~/.zshrc" = { source = "dotfiles/zshrc" }
+"~/.zshenv" = { source = "dotfiles/zshenv", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "linux" }] }
+"~/.zshrc" = { source = "dotfiles/zshrc", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "linux" }] }
 "~/.nanorc" = { source = "dotfiles/nanorc" }
 "~/.gitconfig" = { source = "dotfiles/gitconfig", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }, { profile = "windows" }] }
 "~/.claude/skills/cognitive-rhythm-writing/SKILL.md" = { source = "dotfiles/claude/skills/cognitive-rhythm-writing/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }, { profile = "windows" }] }
