@@ -24,10 +24,11 @@ mb packages upgrade
 ### macOS
 
 ```zsh
-# Place your GPG secret key at ~/.sec.key, then:
-bash <(curl -fsSL https://egpl.dev/mb/bootstrap.sh)
+# Locate keys
+mv ~/Downloads/sec ~/.sec.key
+mv ~/Downloads/pcs.p12 ~/.bw.p12
 
-# Run again to install `mas` packages
+bash <(curl -fsSL https://egpl.dev/mb/bootstrap.sh)
 mb
 ```
 
@@ -42,8 +43,9 @@ termux-change-repo
 # Enable to access local storage
 termux-setup-storage
 
-# Locate my.gpg key
+# Locate keys
 mv ~/storage/downloads/sec ~/.sec.key
+mv ~/storage/downloads/android.p12 ~/.bw.p12
 
 # Setup
 bash <(curl -fsSL https://egpl.dev/mb/bootstrap.sh)
@@ -57,7 +59,9 @@ Install [Ubuntu Desktop](https://ubuntu.com/download/desktop) with [`autoinstall
 It installs mise and clones this repo to `~/.config/mise`. After restarted:
 
 ```bash
-# Place your GPG secret key at ~/.sec.key, then:
+mv ~/Downloads/sec ~/.sec.key
+mv ~/Downloads/android.p12 ~/.bw.p12
+
 bash ~/.config/mise/docs/bootstrap.sh
 ```
 
@@ -66,6 +70,9 @@ bash ~/.config/mise/docs/bootstrap.sh
 In PowerShell, as yourself (not as Administrator):
 
 ```powershell
+mv ~\Downloads\sec ~/.sec.key
+mv ~\Downloads\pcs.p12 ~/.bw.p12
+
 & ([scriptblock]::Create((irm https://egpl.dev/mb/bootstrap.ps1)))
 ```
 
