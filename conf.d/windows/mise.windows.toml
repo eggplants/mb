@@ -45,6 +45,7 @@ node = "latest"
 "winget:Microsoft.VCRedist.2015+.x86" = "latest"
 "winget:Nvidia.PhysX" = "latest"
 # apps
+"winget:Bitwarden.Bitwarden" = "latest"
 "winget:CometNetwork.BitComet" = "latest"
 "winget:CrystalDewWorld.CrystalDiskInfo" = "latest"
 "winget:Google.Chrome" = "latest"
