@@ -42,6 +42,16 @@ alias mclaude='CLAUDE_CONFIG_DIR=~/.mclaude claude'
 [[ -r $HOME/.config/wine/font-noaa.conf ]] &&
   alias wine-rpg='FONTCONFIG_FILE="$HOME/.config/wine/font-noaa.conf" wine'
 
+# bw: bw.egpl.dev wants a client certificate, which the bw CLI cannot present by itself; the
+# preload hands it the one setup:bitwarden extracted from ~/.bw.p12 (dotfiles/bw-mtls)
+bw() {
+  if [[ -r $HOME/.config/bw-mtls/key.pem && -r $HOME/.config/bw-mtls/preload.cjs ]]; then
+    NODE_OPTIONS="--require $HOME/.config/bw-mtls/preload.cjs${NODE_OPTIONS:+ $NODE_OPTIONS}" command bw "$@"
+  else
+    command bw "$@"
+  fi
+}
+
 # mb = `mise bootstrap` for this machine. Runs from ~ (a project .miserc.toml in the cwd would
 # replace the env list) and refuses whatever would replace or tear down the pinned platform.
 # A shell started from an older zshrc still has `alias mb='mise bootstrap'`; re-sourcing this

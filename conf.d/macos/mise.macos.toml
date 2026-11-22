@@ -149,7 +149,8 @@ run = [
   { task = "setup:docker" },
   { task = "setup:vscode" },
   { task = "setup:claude" },
+  { task = "setup:bitwarden" },
 ]
 
 [task_config]
-includes = ["tasks", "../../shared/tasks/gpg", "../../shared/tasks/claude", "../../shared/tasks/workstation"]
+includes = ["tasks", "../../shared/tasks/gpg", "../../shared/tasks/claude", "../../shared/tasks/workstation", "../../shared/tasks/bitwarden"]

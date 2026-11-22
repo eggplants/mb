@@ -18,6 +18,8 @@
 "apt:winehq-devel" = "latest"
 "apt:winetricks" = "latest"
 "apt:language-pack-ja" = "latest"
+# pk12util and certutil: setup:bitwarden imports ~/.bw.p12 into ~/.pki/nssdb
+"apt:libnss3-tools" = "latest"
 "apt:flatpak" = "latest"
 "apt:gnome-software-plugin-flatpak" = "latest"
 # Installed after apt in the same run (mise applies apt before flatpak), from the

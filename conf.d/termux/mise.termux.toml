@@ -12,6 +12,8 @@ write_targets.dotfiles = "~/.config/mise/conf.d/termux/mise.termux.toml"
 "go:github.com/azu/dockerfile-pin" = "latest"
 # the prebuilt linux binary resolves DNS via /etc/resolv.conf, which Android lacks
 "go:github.com/eggplants/dev-null-tui/cmd/dn" = "latest"
+# runs on pkg's nodejs-lts; bw() in dotfiles/zshrc preloads a client certificate
+"npm:@bitwarden/cli" = "latest"
 # https://github.com/leeguooooo/claude-code-usage-bar/issues/83
 "pipx:claude-statusbar" = "3.53.1"
 
@@ -35,6 +37,9 @@ write_targets.dotfiles = "~/.config/mise/conf.d/termux/mise.termux.toml"
 "pkg:jq" = "latest"
 "pkg:make" = "latest"
 "pkg:nano" = "latest"
+# node for npm:@bitwarden/cli (it needs 22 or later); openssl for setup:bitwarden
+"pkg:nodejs-lts" = "latest"
+"pkg:openssl-tool" = "latest"
 "pkg:patchelf-glibc" = "latest"
 "pkg:perl" = "latest"
 "pkg:pinentry" = "latest"
@@ -61,7 +66,7 @@ pre-tools = "mise -E {{ mise_env | join(sep=\",\") }} bootstrap packages apply -
 [tasks.bootstrap]
 description = "Run imperative setup steps after the declarative bootstrap"
 depends = ["host:check"]
-run = [{ task = "setup:shell" }, { task = "setup:storage" }, { task = "setup:gpg" }, { task = "setup:git" }, { task = "setup:claude-code" }, { task = "setup:claude" }]
+run = [{ task = "setup:shell" }, { task = "setup:storage" }, { task = "setup:gpg" }, { task = "setup:git" }, { task = "setup:claude-code" }, { task = "setup:claude" }, { task = "setup:bitwarden" }]
 
 [task_config]
-includes = ["tasks", "../../shared/tasks/gpg", "../../shared/tasks/claude"]
+includes = ["tasks", "../../shared/tasks/gpg", "../../shared/tasks/claude", "../../shared/tasks/bitwarden"]

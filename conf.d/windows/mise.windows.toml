@@ -9,6 +9,9 @@ ripgrep = "latest"
 "aqua:azu/dockerfile-pin" = "latest"
 # uv is the backend for pipx: tools
 uv = "latest"
+# the npm build of the CLI: bw in pwsh/profile.ps1 preloads a client certificate
+node = "latest"
+"npm:@bitwarden/cli" = "latest"
 # https://github.com/leeguooooo/claude-code-usage-bar/issues/83
 "pipx:claude-statusbar" = "3.53.1"
 
@@ -69,7 +72,7 @@ zsh = false
 [tasks.bootstrap]
 description = "Run imperative setup steps after the declarative bootstrap"
 depends = ["host:check"]
-run = [{ task = "setup:pwsh" }, { task = "setup:nano" }, { task = "setup:gpg" }, { task = "setup:git" }, { task = "setup:claude" }]
+run = [{ task = "setup:pwsh" }, { task = "setup:nano" }, { task = "setup:gpg" }, { task = "setup:git" }, { task = "setup:claude" }, { task = "setup:bitwarden" }]
 
 [task_config]
 includes = ["tasks"]

@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+#MISE description="Point the bw CLI at bw.egpl.dev and import its client certificate from ~/.bw.p12"
+# Windows has a twin, conf.d/windows/tasks/setup/bitwarden.ps1.
+#MISE raw=true
+set -euo pipefail
+
+server=https://bw.egpl.dev
+p12=~/.bw.p12
+# cert.pem and key.pem for the bw CLI (dotfiles/bw-mtls/preload.cjs), and what the last import
+# put into the system store, so that a renewed .p12 replaces it
+dir=~/.config/bw-mtls
+
+# bw keeps its data per server and refuses to switch while logged in to another one
+if command -v bw >/dev/null && [[ "$(bw config server 2>/dev/null)" != "$server" ]]; then
+  bw config server "$server" >/dev/null ||
+    echo "setup:bitwarden: bw is logged in to another server; run \`bw logout\`, then re-run" >&2
+fi
+
+if [[ ! -f $p12 ]]; then
+  echo "setup:bitwarden: no client certificate (place the .p12 for bw.egpl.dev at ~/.bw.p12 and re-run)" >&2
+  exit 0
+fi
+
+openssl=openssl
+# macOS's own openssl is LibreSSL, and egpl.dev's scripts write the .p12 with OpenSSL 3
+if [[ $OSTYPE == darwin* ]]; then
+  openssl="$(brew --prefix openssl@3)/bin/openssl"
+fi
+
+sum="$("$openssl" dgst -sha256 -r "$p12" | cut -d' ' -f1)"
+if [[ "$(cat "$dir/p12.sha256" 2>/dev/null)" == "$sum" ]]; then
+  exit 0
+fi
+if [[ ! -t 0 ]]; then
+  echo "setup:bitwarden: ~/.bw.p12 is new, but there is no terminal to ask its password on; re-run from one" >&2
+  exit 0
+fi
+read -rsp 'setup:bitwarden: password of ~/.bw.p12: ' BW_P12_PASSWORD </dev/tty
+echo
+# openssl reads it from the environment, which other users cannot see (unlike its arguments)
+export BW_P12_PASSWORD
+
+install -d -m 700 "$dir"
+if ! "$openssl" pkcs12 -in "$p12" -passin env:BW_P12_PASSWORD -clcerts -nokeys -out "$dir/cert.pem.new" 2>/dev/null; then
+  rm -f "$dir/cert.pem.new"
+  echo "setup:bitwarden: cannot open ~/.bw.p12 (wrong password?)" >&2
+  exit 1
+fi
+(umask 077 && "$openssl" pkcs12 -in "$p12" -passin env:BW_P12_PASSWORD -nocerts -noenc -out "$dir/key.pem.new" 2>/dev/null)
+mv "$dir/cert.pem.new" "$dir/cert.pem"
+mv "$dir/key.pem.new" "$dir/key.pem"
+sha1="$("$openssl" x509 -in "$dir/cert.pem" -noout -fingerprint -sha1 | sed 's/.*=//; s/://g')"
+# the .p12's friendly name, from the bag attributes openssl writes above the certificate
+name="$(sed -n 's/^ *friendlyName: //p' "$dir/cert.pem" | head -1)"
+
+# the browsers and the desktop app take the certificate from the system store
+case $OSTYPE in
+  darwin*)
+    kc=~/Library/Keychains/login.keychain-db
+    # the last import (replaced by a renewal) and this one (when re-importing it)
+    for old in "$(cat "$dir/keychain.sha1" 2>/dev/null)" "$sha1"; do
+      [[ -z $old ]] || security delete-identity -Z "$old" "$kc" >/dev/null 2>&1 || true
+    done
+    # -T lets these apps use the key without asking
+    security import "$p12" -k "$kc" -f pkcs12 -P "$BW_P12_PASSWORD" \
+      -T /Applications/Bitwarden.app -T '/Applications/Google Chrome.app' >/dev/null
+    security set-identity-preference -Z "$sha1" -s "$server/" "$kc"
+    echo "$sha1" >"$dir/keychain.sha1"
+    ;;
+  linux-android)
+    # Termux: the Bitwarden app takes the .p12 in its own server settings
+    ;;
+  linux*)
+    # Chrome and the Bitwarden deb (Electron) share this NSS database; Firefox has its own
+    if command -v pk12util >/dev/null; then
+      db="sql:$HOME/.pki/nssdb"
+      if [[ ! -f ~/.pki/nssdb/cert9.db ]]; then
+        install -d -m 700 ~/.pki/nssdb
+        certutil -N -d "$db" --empty-password
+      fi
+      # NSS names the certificate after the friendly name: drop the last import and any
+      # earlier one of the same name, key included
+      for old in "$(cat "$dir/nssdb.nickname" 2>/dev/null)" "$name"; do
+        [[ -z $old ]] || certutil -F -d "$db" -n "$old" 2>/dev/null || certutil -D -d "$db" -n "$old" 2>/dev/null || true
+      done
+      pk12util -i "$p12" -d "$db" -w <(printf '%s' "$BW_P12_PASSWORD") >/dev/null
+      echo "$name" >"$dir/nssdb.nickname"
+    fi
+    ;;
+esac
+
+echo "$sum" >"$dir/p12.sha256"
+echo "setup:bitwarden: imported ~/.bw.p12 ($("$openssl" x509 -in "$dir/cert.pem" -noout -subject))" >&2

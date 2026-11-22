@@ -42,6 +42,21 @@ function mb {
   try { mise bootstrap @args } finally { Pop-Location }
 }
 
+# bw: bw.egpl.dev wants a client certificate, which the bw CLI cannot present by itself; the
+# preload hands it the one setup:bitwarden extracted from ~/.bw.p12 (dotfiles/bw-mtls)
+function bw {
+  $real = Get-Command bw -CommandType Application, ExternalScript -ErrorAction SilentlyContinue | Select-Object -First 1
+  if (-not $real) { Write-Error 'bw: not installed (npm:@bitwarden/cli)'; return }
+  $dir = Join-Path $HOME '.config\bw-mtls'
+  $saved = $env:NODE_OPTIONS
+  if ((Test-Path (Join-Path $dir 'key.pem')) -and (Test-Path (Join-Path $dir 'preload.cjs'))) {
+    # NODE_OPTIONS takes backslashes inside quotes as escapes
+    $preload = (Join-Path $dir 'preload.cjs') -replace '\\', '/'
+    $env:NODE_OPTIONS = "--require `"$preload`" $saved".Trim()
+  }
+  try { & $real.Source @args } finally { $env:NODE_OPTIONS = $saved }
+}
+
 function CustomListChildItems {
   Get-ChildItem $args[0] -Force |
     Sort-Object -Property @{ Expression = 'LastWriteTime'; Descending = $true },
