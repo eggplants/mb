@@ -27,7 +27,8 @@ plugins=(
   # after eli5 and yomiyasu, its dependencies, so that they are not installed twice
   japanese-oss-handbook@agent-plugins-for-eggplants
 )
-# user-scope MCP servers (name=command), added only when the command is installed
+# user-scope MCP servers (name=command), added only when the command is installed; leading
+# VAR=value words go into the server's env, with =~/ standing for $HOME
 mcp_servers=(
   'trivy=trivy mcp'
 )
@@ -107,7 +108,13 @@ for dir in '' ~/.mclaude; do
   done
   for s in "${mcp_servers[@]}"; do
     read -ra cmd <<<"${s#*=}"
+    add=(mcp add --scope user "${s%%=*}")
+    while [[ ${cmd[0]} =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; do
+      # --env=, not -e: the variadic -e would also take the words after it
+      add+=("--env=${cmd[0]/=\~\//=$HOME/}")
+      cmd=("${cmd[@]:1}")
+    done
     command -v "${cmd[0]}" &>/dev/null || continue
-    "${c[@]}" mcp get "${s%%=*}" &>/dev/null || "${c[@]}" mcp add --scope user "${s%%=*}" -- "${cmd[@]}"
+    "${c[@]}" mcp get "${s%%=*}" &>/dev/null || "${c[@]}" "${add[@]}" -- "${cmd[@]}"
   done
 done

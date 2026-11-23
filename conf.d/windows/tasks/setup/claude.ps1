@@ -27,7 +27,8 @@ $plugins = @(
   # after eli5 and yomiyasu, its dependencies, so that they are not installed twice
   'japanese-oss-handbook@agent-plugins-for-eggplants'
 )
-# user-scope MCP servers (name=command), added only when the command is installed
+# user-scope MCP servers (name=command), added only when the command is installed; leading
+# VAR=value words go into the server's env, with =~/ standing for $HOME
 $mcpServers = @(
   'trivy=trivy mcp'
 )
@@ -104,9 +105,18 @@ foreach ($p in $plugins) {
 }
 foreach ($s in $mcpServers) {
   $name, $command = $s -split '=', 2
-  $cmd = -split $command
-  if (-not (Get-Command $cmd[0] -ErrorAction SilentlyContinue)) { continue }
+  $cmd = @(-split $command)
+  $add = @('mcp', 'add', '--scope', 'user', $name)
+  while ($cmd[0] -match '^[A-Za-z_]\w*=') {
+    # --env=, not -e: the variadic -e would also take the words after it
+    $add += '--env=' + $cmd[0].Replace('=~/', "=$HOME/")
+    $cmd = @($cmd | Select-Object -Skip 1)
+  }
+  $exe = Get-Command $cmd[0] -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+  if (-not $exe) { continue }
+  # Claude Code starts the server without a shell, which cannot run an npm .cmd shim
+  if ($exe.Extension -in '.cmd', '.bat') { $cmd = @('cmd', '/c') + $cmd }
   & claude mcp get $name *> $null
-  if ($LASTEXITCODE) { Invoke-Claude mcp add --scope user $name -- @cmd }
+  if ($LASTEXITCODE) { Invoke-Claude @add -- @cmd }
 }
 if ($failed) { throw "setup:claude: failed: $($failed -join '; ')" }
