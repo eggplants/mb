@@ -91,7 +91,6 @@ adopt = true
 "brew-cask:android-commandlinetools" = "latest"
 "brew-cask:android-studio" = "latest"
 "brew-cask:aws-vpn-client" = "latest"
-"brew-cask:bitwarden" = "latest"
 "brew-cask:claude" = "latest"
 "brew-cask:font-guguru-sans-code" = "latest"
 "brew-cask:font-hackgen-nerd" = "latest"
@@ -150,8 +149,7 @@ run = [
   { task = "setup:docker" },
   { task = "setup:vscode" },
   { task = "setup:claude" },
-  { task = "setup:bitwarden" },
 ]
 
 [task_config]
-includes = ["tasks", "../../shared/tasks/gpg", "../../shared/tasks/claude", "../../shared/tasks/workstation", "../../shared/tasks/bitwarden"]
+includes = ["tasks", "../../shared/tasks/gpg", "../../shared/tasks/claude", "../../shared/tasks/workstation"]

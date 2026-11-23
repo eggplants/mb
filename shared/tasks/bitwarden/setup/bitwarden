@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Point the bw CLI at bw.egpl.dev and import its client certificate from ~/.bw.p12"
-# Windows has a twin, conf.d/windows/tasks/setup/bitwarden.ps1.
+# Windows has a twin, conf.d/windows/tasks/setup/bitwarden.ps1. Not on macOS.
 #MISE raw=true
 set -euo pipefail
 
@@ -21,13 +21,7 @@ if [[ ! -f $p12 ]]; then
   exit 0
 fi
 
-openssl=openssl
-# macOS's own openssl is LibreSSL, and egpl.dev's scripts write the .p12 with OpenSSL 3
-if [[ $OSTYPE == darwin* ]]; then
-  openssl="$(brew --prefix openssl@3)/bin/openssl"
-fi
-
-sum="$("$openssl" dgst -sha256 -r "$p12" | cut -d' ' -f1)"
+sum="$(openssl dgst -sha256 -r "$p12" | cut -d' ' -f1)"
 if [[ "$(cat "$dir/p12.sha256" 2>/dev/null)" == "$sum" ]]; then
   exit 0
 fi
@@ -41,32 +35,19 @@ echo
 export BW_P12_PASSWORD
 
 install -d -m 700 "$dir"
-if ! "$openssl" pkcs12 -in "$p12" -passin env:BW_P12_PASSWORD -clcerts -nokeys -out "$dir/cert.pem.new" 2>/dev/null; then
+if ! openssl pkcs12 -in "$p12" -passin env:BW_P12_PASSWORD -clcerts -nokeys -out "$dir/cert.pem.new" 2>/dev/null; then
   rm -f "$dir/cert.pem.new"
   echo "setup:bitwarden: cannot open ~/.bw.p12 (wrong password?)" >&2
   exit 1
 fi
-(umask 077 && "$openssl" pkcs12 -in "$p12" -passin env:BW_P12_PASSWORD -nocerts -noenc -out "$dir/key.pem.new" 2>/dev/null)
+(umask 077 && openssl pkcs12 -in "$p12" -passin env:BW_P12_PASSWORD -nocerts -noenc -out "$dir/key.pem.new" 2>/dev/null)
 mv "$dir/cert.pem.new" "$dir/cert.pem"
 mv "$dir/key.pem.new" "$dir/key.pem"
-sha1="$("$openssl" x509 -in "$dir/cert.pem" -noout -fingerprint -sha1 | sed 's/.*=//; s/://g')"
 # the .p12's friendly name, from the bag attributes openssl writes above the certificate
 name="$(sed -n 's/^ *friendlyName: //p' "$dir/cert.pem" | head -1)"
 
 # the browsers and the desktop app take the certificate from the system store
 case $OSTYPE in
-  darwin*)
-    kc=~/Library/Keychains/login.keychain-db
-    # the last import (replaced by a renewal) and this one (when re-importing it)
-    for old in "$(cat "$dir/keychain.sha1" 2>/dev/null)" "$sha1"; do
-      [[ -z $old ]] || security delete-identity -Z "$old" "$kc" >/dev/null 2>&1 || true
-    done
-    # -T lets these apps use the key without asking
-    security import "$p12" -k "$kc" -f pkcs12 -P "$BW_P12_PASSWORD" \
-      -T /Applications/Bitwarden.app -T '/Applications/Google Chrome.app' >/dev/null
-    security set-identity-preference -Z "$sha1" -s "$server/" "$kc"
-    echo "$sha1" >"$dir/keychain.sha1"
-    ;;
   linux-android)
     # Termux: the Bitwarden app takes the .p12 in its own server settings
     ;;
@@ -90,4 +71,4 @@ case $OSTYPE in
 esac
 
 echo "$sum" >"$dir/p12.sha256"
-echo "setup:bitwarden: imported ~/.bw.p12 ($("$openssl" x509 -in "$dir/cert.pem" -noout -subject))" >&2
+echo "setup:bitwarden: imported ~/.bw.p12 ($(openssl x509 -in "$dir/cert.pem" -noout -subject))" >&2

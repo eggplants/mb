@@ -26,7 +26,6 @@ mb packages upgrade
 ```zsh
 # Locate keys
 mv ~/Downloads/sec ~/.sec.key
-mv ~/Downloads/pcs.p12 ~/.bw.p12
 
 bash <(curl -fsSL https://egpl.dev/mb/bootstrap.sh)
 mb

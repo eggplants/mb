@@ -17,6 +17,10 @@ python = "latest"
 java = "21"
 maven = "latest"
 "pipx:getjmanga" = "latest"
+# the npm build, not the standalone binary: bw() in dotfiles/zshrc preloads a client certificate
+"npm:@bitwarden/cli" = "latest"
+# setup:claude registers it with Claude Code; it runs bw through dotfiles/bw-mtls/bw.cjs
+"npm:@bitwarden/mcp-server" = "latest"
 
 [bootstrap.packages]
 "apt:build-essential" = "latest"
