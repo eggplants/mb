@@ -30,6 +30,9 @@ $plugins = @(
 # user-scope MCP servers (name=command), added only when the command is installed; leading
 # VAR=value words go into the server's env, with =~/ standing for $HOME
 $mcpServers = @(
+  # the server runs bw with an env that drops NODE_OPTIONS, so the bw function cannot preload the
+  # client certificate for bw.egpl.dev; bw.cjs does (dotfiles/bw-mtls)
+  'bitwarden=BW_CLI_PATH=~/.config/bw-mtls/bw.cjs mcp-server-bitwarden'
   'trivy=trivy mcp'
 )
 # skills installed into ~/.claude/skills by gh skill (name=repo), only when gh is installed

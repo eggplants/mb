@@ -25,6 +25,7 @@ bash = true
 "~/.nanorc" = { source = "dotfiles/nanorc" }
 "~/.gitconfig" = { source = "dotfiles/gitconfig", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }, { profile = "windows" }] }
 "~/.config/bw-mtls/preload.cjs" = { source = "dotfiles/bw-mtls/preload.cjs", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }, { profile = "windows" }] }
+"~/.config/bw-mtls/bw.cjs" = { source = "dotfiles/bw-mtls/bw.cjs", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }, { profile = "windows" }] }
 "~/.claude/skills/cognitive-rhythm-writing/SKILL.md" = { source = "dotfiles/claude/skills/cognitive-rhythm-writing/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }, { profile = "windows" }] }
 "~/.claude/skills/japanese-tech-writing/SKILL.md" = { source = "dotfiles/claude/skills/japanese-tech-writing/SKILL.md", variants = [{ profile = "macos" }, { profile = "termux" }, { profile = "ubuntu" }, { profile = "windows" }] }
 

@@ -12,6 +12,8 @@ uv = "latest"
 # the npm build of the CLI: bw in pwsh/profile.ps1 preloads a client certificate
 node = "latest"
 "npm:@bitwarden/cli" = "latest"
+# setup:claude registers it with Claude Code; it runs bw through dotfiles/bw-mtls/bw.cjs
+"npm:@bitwarden/mcp-server" = "latest"
 # https://github.com/leeguooooo/claude-code-usage-bar/issues/83
 "pipx:claude-statusbar" = "3.53.1"
 

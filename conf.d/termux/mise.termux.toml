@@ -14,6 +14,8 @@ write_targets.dotfiles = "~/.config/mise/conf.d/termux/mise.termux.toml"
 "go:github.com/eggplants/dev-null-tui/cmd/dn" = "latest"
 # runs on pkg's nodejs-lts; bw() in dotfiles/zshrc preloads a client certificate
 "npm:@bitwarden/cli" = "latest"
+# setup:claude registers it with Claude Code; it runs bw through dotfiles/bw-mtls/bw.cjs
+"npm:@bitwarden/mcp-server" = "latest"
 # https://github.com/leeguooooo/claude-code-usage-bar/issues/83
 "pipx:claude-statusbar" = "3.53.1"
 
